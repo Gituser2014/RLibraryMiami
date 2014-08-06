@@ -1,0 +1,246 @@
+---
+title: "Epi Aragon""
+author: "Juanjo Moreiras"
+date: "Thursday, July 31, 2014"
+output: html_document
+
+```
+##-----EPIDEMIOLOGY BASICS --------##
+
+```{r}
+install.packages("Epi")
+library(Epi)
+data( births )
+str(births)
+summary(births)
+names(births)
+summary(births$hyp)
+```
+
+## PARTS OF THE DATA FRAME
+
+```{r aragon}
+births[1,"bweight"]
+births[2,"bweight"]
+births[1:10, "bweight"]
+births[, "bweight"]
+```
+
+## TURNING A VARIABLE INTO A FACTOR
+
+```{r Aragon}
+hyp <- factor(births$hyp)
+str(births)
+objects()
+births <- transform(births, hyp=factor(hyp))
+str(births)
+births <- transform( births, hyp=factor(hyp,labels=c("normal","hyper")) )
+str(births)
+```
+
+## FREQUENCY TABLES
+
+```{r Aragon}
+stat.table(hyp,data=births)
+stat.table(sex,data=births)
+stat.table(list(hyp,sex),data=births)
+```
+
+## GROUPING VALUES OF A METRIC VARIABLE
+# Cutting matage into groups 20{29, 30{34, 35{39, 40{44 creating a factor called agegrp
+
+```{r Aragon}
+births <- transform(births,agegrp=cut(matage, breaks=c(20,30,35,40,45),right=FALSE))
+stat.table(agegrp,data=births)
+```
+
+# Now, cutting a variable into a given number of intervals of equal length 
+
+```{r Aragon}
+births <- transform(births,agegrp=cut(matage,breaks=5,right=FALSE))
+stat.table(agegrp,data=births)
+```
+
+## TABLES OF MEANS AND OTHER FUNCTIONS
+# mean bweight by sex
+
+```{r Aragon}
+stat.table(sex, mean(bweight), data=births)
+stat.table(sex,list("Mean birth weight"=mean(bweight)),data=births)
+```
+
+## 2x2 table of mean birth weight by sex and hypertension
+
+```{r Aragon}
+stat.table(list(sex,hyp),mean(bweight),data=births)
+```
+
+# Available functions: count, mean, weighted mean, sum, min, max, quantile,median, IQR, ratio, rates, odds
+
+```{r Aragon}
+stat.table(list(sex,hyp),list(count(),mean(bweight)),data=births)
+stat.table(hyp, list("odds"=ratio(lowbw,1-lowbw,100)),data=births)
+```
+
+# Margins can be added to the tables, as required
+
+```{r Aragon}
+stat.table(sex, mean(bweight),data=births,margins=TRUE)
+stat.table(list(sex,hyp),mean(bweight),data=births,margins=c(TRUE,FALSE))
+```
+
+## GENERATING NEW VARIABLES
+
+```{r Aragon}
+births <- transform(births,
+                    num1=1,
+                    num2=2,
+                    logbw=log(bweight))
+```
+
+# Logical variables
+
+```{r Aragon}
+births <- transform(births, low=bweight<2000)
+str(births)
+```
+
+# Restricting a command to a subset of the data.Example: list values bweight for hypertensive women
+
+```{r Aragon}
+births$bweight[births$hyp=="hyper"]
+```
+
+# Subsetting a data frame
+
+```{r Aragon}
+subset(births, hyp=="hyper")
+```
+
+## ATTACHING A DATA SET
+# for typing "just" hyp instead the cumbersome command "births$hyp"
+# Places a copy of the variable in the births data in position 2
+
+```{r Aragon}
+attach(births)
+objects(2)
+summary(hyp)
+
+# do not forget to type detach
+detach (births) 
+search()  #be sure "package:Epi" is in place number two
+```
+
+## SOME TYPES OF PLOTS
+
+```{r Aragon}
+## Basic
+hist(bweight, col="gray", border="white")
+plot(gestwks, bweight, pch=16, col="green")
+points(gestwks, bweight)
+
+## More complicated
+plot(gestwks, bweight, type="n")
+points(gestwks[sex==1], bweight[sex==1], col="blue")
+points(gestwks[sex==2], bweight[sex==2], col="red")
+
+## Legends
+legend("topleft", pch=1, legend=c("Boys","Girls"), col=c("blue","red"))
+title("Birth weight vs gestational weeks in 500 singleton births")
+
+## Using indexing 
+c("blue","red")
+ sex
+c("blue","red")[sex]
+plot( gestwks, bweight, pch=16, col=c("blue","red")[sex] )
+
+## Separates mothers >40
+oldmum <- ( matage >= 40 ) + 1
+plot( gestwks, bweight, pch=c(16,3)[oldmum], col=c("blue","red")[sex] )
+plot( gestwks, bweight, pch=c(16,3)[(matage>=40 )+1], col=c("blue","red")[sex] )
+
+## Interacting with plots
+plot( gestwks, bweight, pch=c(16,3)[(matage>=40 )+1], col=c("blue","red")[sex] )
+identify( gestwks, bweight )
+
+# Saving visualization
+# file -> save as-> .pdf or into for example .emf
+
+# Controling the plot
+win.metafile(file="plot1.emf", height=3, width=4)
+plot(gestwks, bweight)
+dev.off()
+
+# Manipulating the plot
+# help->Html help->Packages->base->P->par
+par( mfrow=c(2,3) )
+par( mfrow=c(1,1) )
+```
+
+## THE FUNCTION EFFX
+
+```{r Aragon}
+library(Epi)
+data(births)
+help(births)
+
+# First transforming some variables
+births$hyp <- factor(births$hyp,labels=c("normal","hyper"))
+births$sex <- factor(births$sex,labels=c("M","F"))
+births$agegrp <- cut(births$matage,breaks=c(20,25,30,35,40,45),right=FALSE)
+births$gest4 <- cut(births$gestwks,breaks=c(20,35,37,39,45),right=FALSE)
+
+# The effect of sex on birth weight, measured as a difference in means,
+effx(response=bweight,typ="metric",exposure=sex,data=births)
+stat.table(sex,mean(bweight), data=births)
+
+# The effect of sex on lowbw, measured as an odds ratio, is 1.43
+effx(response=lowbw,typ="binary",exposure=sex,data=births)
+
+# Factors on more than two levels
+# There are 3 effects
+effx(response=bweight,typ="metric",exposure=gest4,data=births)
+stat.table(gest4,mean(bweight),data=births)
+
+# Stratified effects
+# The eects of hyp in the dierent strata dened by sex are
+effx(bweight, type="metric", exposure=hyp, strata=sex,data=births)
+
+# Controlling the effect of a variable for a third variable (potential confounder)
+effx(bweight, type="metric", exposure=hyp, control=sex,data=births)
+
+# Numeric esposures metric
+effx(response=bweight, type="metric", exposure=gestwks,data=births)
+effx(response=lowbw, type="binary", exposure=gestwks,data=births)
+
+# Checking on linearity with a plot
+with(births, plot(gestwks,bweight))
+```
+
+## DATES IN R
+
+```{r}
+
+data(diet)
+str(diet) 
+
+## Converting a character string (or a character variable) to date format
+as.Date( "14/07/1952", format="%d/%m/%Y" )
+as.numeric( as.Date( "14/07/1952", format="%d/%m/%Y" ) )
+
+## Entering a fixed date. For example to terminate a follow-up 1st April 1975
+newx <- pmin( diet$dox, as.Date( "1975-4-1", format="%F" ) )
+   
+## You can print dates in the format you like by using the function format.Date()
+bdat <- as.Date( "1952-7-14", format="%F" )
+format.Date( bdat, format="%A %d %B %Y" )
+
+## The function cal.yr converts dates to fractional years
+as.Date( "1952-7-14" )
+ cal.yr( as.Date("1952-7-14") )
+ cal.yr( "1952-7-14" )
+
+## cal.yr can find all date-variables in the dataframe and convert them
+data( diet )
+str( diet )
+str( cal.yr(diet) )
