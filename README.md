@@ -32,6 +32,9 @@ If you've already created the repo and are looking at the regular page, use the 
 8.	Type git add -A to stage all new and changed files (this is the equivalent of git add . followed by git add -u).
 9.	Type git commit -m "this is my clever comment about what changes have been made" to commit the changes. If you forget to include the comment, Git will open the default text editor your shell uses. For OS X, that's Vim: type in your comment, then hit the Escape key and type in :x to save the text and quit.
 10.	Finally, type in git push origin master to push all of your changes up to the remote repo. Go there and verify that they are indeed there (you may have to refresh the page if it's been open all this time).
+11.	
+
+
 If you instead choose to start from GitHub (which is much easier),
 1.	Create your remote repo (step 4 above)
 2.	In terminal, change into the parent directory of where you want the local repo to go. In my case, I'd type cd ~\gitprojects, and make sure there's no directory in it with the same name as the repo I want to clone, because you cannot clone into an existing directory.
