@@ -1,5 +1,5 @@
 ---
-title: "Epi Aragon""
+title: "EpiTools"
 author: "Juanjo Moreiras"
 date: "Thursday, July 31, 2014"
 output: html_document
