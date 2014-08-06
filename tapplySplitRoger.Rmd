@@ -1,0 +1,206 @@
+---
+title: "tapply and split"
+author: "Juanjo Moreiras"
+date: "Friday, July 25, 2014"
+output: html_document
+
+
+## tapply (Roger Peng). To apply a function over subsets of a vector
+
+# function (X, INDEX, FUN = NULL, ..., simplify = TRUE)
+- `X` is a vector
+- `INDEX` is a factor or a list of factors (or else they are coerced to factors) 
+- `FUN` is a function to be applied
+- ... contains other arguments to be passed `FUN`
+- `simplify`, should we simplify the result?
+
+```{r Roger}
+
+> str(tapply)
+#function (X, INDEX, FUN = NULL, ..., simplify = TRUE)
+
+```
+
+## Take group means.
+
+```{r Roger}
+
+x <- c(rnorm(10), runif(10), rnorm(10, 1)); x
+# [1] -2.27265022  1.96454972  0.19220818  0.87602574  0.71518988 -0.22076331  0.45142154
+# [8]  0.06268169  1.05329294  2.04540557  0.88660834  0.87920589  0.86578012  0.29967751
+#[15]  0.96081425  0.63754863  0.43947666  0.03630077  0.61804896  0.45872447 -0.05390791
+#[22]  2.31971734  1.04949095 -0.03544434  1.21714768  2.02673117  1.46553506  0.50373965
+#[29]  1.51163628 -1.59413027
+
+f <- gl(3, 10); f 
+# [1] 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3
+#[24] 3 3 3 3 3 3 3
+#Levels: 1 2 3
+
+tapply(x, f, mean)
+        1         2         3 
+0.1144464 0.5163468 1.2463678
+
+```
+
+## Take group means without simplification.
+
+```{r Roger}
+
+tapply(x, f, mean, simplify = FALSE)
+#$`1`
+#[1] 0.4867362
+
+#$`2`
+#[1] 0.6082186
+
+#$`3`
+#[1] 0.8410516
+
+```
+
+## Find group ranges.
+
+```{r Roger}
+
+tapply(x, f, range)
+#$`1`
+#[1] -2.272650  2.045406
+
+#$`2`
+#[1] 0.03630077 0.96081425
+
+#$`3`
+#[1] -1.594130  2.319717
+
+```
+
+## split. takes a vector or other objects and splits it into groups determined by a factor or list of factors
+
+# function (x, f, drop = FALSE, ...)
+
+- `x` is a vector (or list) or data frame
+- `f` is a factor (or coerced to one) or a list of factors
+- `drop` indicates whether empty factors levels should be dropped
+
+```{r Roger}
+
+str(split)
+function (x, f, drop = FALSE, ...)
+  
+```  
+
+## An a example of split
+
+```{r Roger}
+
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+f <- gl(3, 10)
+split(x, f)
+#$`1`
+# [1]  0.04369846  0.64613515  1.34142474 -0.74953436 -1.13573961 -1.22188769  0.86610468  0.99275201  3.23702995
+# [10]  0.64253753
+#$`2`
+# [1] 0.6116775 0.6327786 0.8004982 0.5051107 0.4092149 0.9231836 0.5768224 0.8965029 0.1298950 0.9934782
+#$`3`
+# [1]  2.0673728  0.9573406  2.2214485  1.2911139  1.1308204 -0.6184346  1.1317584  1.7641603  2.3844945  0.9834543
+
+```
+
+## A common idiom is `split` followed by an `lapply`.
+
+```{r Roger}
+
+lapply(split(x, f), mean)
+#$`1`
+#[1] -0.2300855
+#$`2`
+#[1] 0.4801524
+#$`3`
+#[1] 0.7864772
+
+```
+
+## Splitting a Data Frame named 'airquality'
+
+```{r Roger}
+
+library(datasets)
+head(airquality)
+#  Ozone Solar.R Wind Temp Month Day 
+#1    41     190  7.4   67     5   1 
+#2    36     118  8.0   72     5   2 
+#3    12     149 12.6   74     5   3 
+#4    18     313 11.5   62     5   4 
+#5    NA      NA 14.3   56     5   5 
+#6    28      NA 14.9   66     5   6
+
+## With split and lapply a data frame
+s <- split(airquality, airquality$Month)
+lapply(s, function(x) colMeans(x[, c("Ozone", "Solar.R", "Wind")]))
+#$`5`
+#   Ozone  Solar.R     Wind 
+#      NA       NA 11.62258 
+#$`6`
+#    Ozone   Solar.R      Wind 
+#       NA 190.16667  10.26667 
+#$`7`
+#     Ozone    Solar.R       Wind 
+#        NA 216.483871   8.941935 
+#$`8`
+#   Ozone  Solar.R     Wind 
+#      NA       NA 8.793548 
+#$`9`
+#   Ozone  Solar.R     Wind 
+#      NA 167.4333  10.1800 
+
+## with sapply
+sapply(s, function(x) colMeans(x[, c("Ozone", "Solar.R", "Wind")])) 
+#               5         6          7        8        9
+#Ozone         NA        NA         NA       NA       NA
+#Solar.R       NA 190.16667 216.483871       NA 167.4333
+#Wind    11.62258  10.26667   8.941935 8.793548  10.1800
+
+## with sapply and na.rm=T
+sapply(s, function(x) colMeans(x[, c("Ozone", "Solar.R", "Wind")],
+                                 na.rm = TRUE))
+                  5            6             7            8           9 
+#Ozone      23.61538     29.44444     59.115385    59.961538   31.44828 
+#Solar.R   181.29630    190.16667    216.483871   171.857143  167.43333 
+#Wind       11.62258     10.26667      8.941935     8.793548   10.18000
+
+```
+
+## Splitting on more than One Level
+
+```{r Roger}
+
+x <- rnorm(10); x
+#[1]  0.62642194  0.04022217 -0.34424828 -0.18752353 -0.71192691 -0.03807643  0.20515955 -1.00306761  0.77065719 -0.48262475
+f1 <- gl(2, 5)
+f2 <- gl(5, 2)
+f1
+# [1] 1 1 1 1 1 2 2 2 2 2
+#Levels: 1 2
+f2
+# [1] 1 1 2 2 3 3 4 4 5 5
+#Levels: 1 2 3 4 5
+interaction(f1, f2)
+# [1] 1.1 1.1 1.2 1.2 1.3 2.3 2.4 2.4 2.5 2.5
+#10 Levels: 1.1 2.1 1.2 2.2 1.3 2.3 1.4 ... 2.5
+
+## Interactions can create empty levels
+str(split(x, list(f1, f2)))
+#List of 10
+# $ 1.1: num [1:2] -0.378  0.445
+# $ 2.1: num(0)
+# $ 1.2: num [1:2] 1.4066 0.0166
+# $ 2.2: num(0)
+# $ 1.3: num -0.355
+# $ 2.3: num 0.315
+# $ 1.4: num(0)
+# $ 2.4: num [1:2] -0.907  0.723
+# $ 1.5: num(0)
+# $ 2.5: num [1:2] 0.732 0.360
+
+

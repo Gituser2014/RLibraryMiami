@@ -1,0 +1,64 @@
+---
+title: "Exploring Data"
+author: "Juanjo Moreiras"
+date: "Wednesday, July 23, 2014"
+output:
+  html_document: default
+---
+
+### Functions used in this unit
+
+cbind                      ## combining columns
+class                      ## checking the type of object
+length                     ## calculates the count
+tapply
+tab1
+
+```{r}
+getwd()
+# "C:/Users/Juanjo/DataScientist/RUcla/RUclaData"
+
+load("Ucla1.rda") 
+Ucla1[1:20,]                ## listing 20 0bservations of the data frame
+names(Ucla1)                ## listing the names of the variables
+class(Ucla1$race)
+dim(Ucla1)
+length(Ucla1$read)
+range(Ucla1$read)
+range(Ucla1$read, na.rm=T)  ## removing missing values from the computation
+mean(Ucla1$read, na.rm=T)   ## removing missing values from the computation
+sd(Ucla1$read, na.rm=T)     ## removing missing values from the computation
+```
+
+## tapply
+
+```{r}
+meanFemale <- tapply(Ucla1$read, Ucla1$female, mean ); meanFemale
+medFemale <-  tapply(Ucla1$read, Ucla1$female, median ); medFemale
+varFemale <-  tapply(Ucla1$read, Ucla1$female, var ); varFemale
+nFemale <-    tapply(Ucla1$read, Ucla1$female, length ); nFemale
+sdFemale <-   tapply(Ucla1$read, UcCla1$female, sd ); sdFemale
+```
+
+## frequency tables
+
+```{r}
+## frequency tables
+table(Ucla1$read)
+tab1 <- table(Ucla1$female, Ucla1$ses); tab1
+prop.table(tab1,1)                                   ## row proportions
+prop.table(tab1,2)                                   ## col proportions
+rowSums(tab1)                                        ## row frequencies
+colSums(tab1)                                        ## col frequencies
+```
+## Correlation frequencies
+
+```{r}
+
+## correlation
+cor(UCla1$read, UCla1$write)
+cor(UCla1$read, UCla1$write, use="complete.obs")
+cor(Ucla1, use="complete.obs")                        ## correlation matrix
+plot(Ucla1$read, Ucla1$write)
+plot(Ucla1)                                           ## plot matrix                                       
+```

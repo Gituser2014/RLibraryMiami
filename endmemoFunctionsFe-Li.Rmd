@@ -1,0 +1,285 @@
+---
+output:
+  html_document:
+    highlight: tango
+---
+---
+title: "Endmemo Functions Fe-Li"
+author: "Juanjo Moreiras"
+date: "Monday, July 28, 2014"
+output: html_document
+
+
+###----------"for loop" Example--------------
+
+## Unlike other program languages, the "for loop" can be write as for (i in arr) {expr1; expr2 ...}. It goes through the vector arr every time one element i, and execute a group of commands inside the { ... } in each cycle. The break statement can be used to terminate the loop abruptly. If you don't want to terminate the whole loop, but just ignore current cycle, the next statement can do that.
+
+```{r}
+## Let's create a vector containing number 1-10:
+samples <- c(rep(1:10)); samples
+ [1]  1  2  3  4  5  6  7  8  9 10
+
+## Go through the samples one by one and print them out:
+for (thissample in samples)
+{
+   print(thissample)
+}
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+
+## Let's do something inside the for loop:
+for (thissample in samples)
+{
+    str <- paste(thissample,"is current sample",sep=" ")
+    print(str)
+}
+[1] "1 is current sample"
+[1] "2 is current sample"
+[1] "3 is current sample"
+[1] "4 is current sample"
+[1] "5 is current sample"
+[1] "6 is current sample"
+[1] "7 is current sample"
+[1] "8 is current sample"
+[1] "9 is current sample"
+[1] "10 is current sample"
+
+## Let's terminate the loop when the sample is 3:
+for (thissample in samples)
+{
+    if (thissample == 3) break
+    str <- paste(thissample,"is current sample",sep=" ")
+    print(str)
+}
+[1] "1 is current sample"
+[1] "2 is current sample"
+
+## Let's ignore when the sample number is even:
+for (thissample in samples)
+{
+    if (thissample %% 2 == 0) next
+    str <- paste(thissample,"is current sample",sep=" ")
+    print(str)
+}
+[1] "1 is current sample"
+[1] "3 is current sample"
+[1] "5 is current sample"
+[1] "7 is current sample"
+[1] "9 is current sample"
+
+## Let's just loop through last three samples:
+end <- length(samples)
+begin <- end - 2
+for (thissample in begin:end)
+{
+    str <- paste(thissample,"is current sample",sep=" ")
+    print(str)
+}
+[1] "8 is current sample"
+[1] "9 is current sample"
+[1] "10 is current sample"
+```
+
+### --------------------"glm" function------------------------
+
+## glm() function fits linear models to the dataset.
+
+glm(formula, family = gaussian, data, weights, subset,
+    na.action, start = NULL, etastart, mustart, offset,
+    control = list(...), model = TRUE, method = "glm.fit",
+    x = FALSE, y = TRUE, contrasts = NULL, ...)
+    
+```{r}
+Orange                     #R growth of orange trees dataset
+   Tree  age circumference
+1     1  118            30
+2     1  484            58
+...
+33    5 1231           142
+34    5 1372           174
+35    5 1582           177
+
+attach(Orange) #put age, Tree, circumference into R search path
+g <- glm(circumference ~ age + Tree); g
+
+Call:  glm(formula = circumference ~ age + Tree)
+
+Coefficients:
+(Intercept)       age    Tree.L    Tree.Q    Tree.C    Tree^4  
+    17.3997    0.1068   39.9350    2.5199   -8.2671   -4.6955  
+
+Degrees of Freedom: 34 Total (i.e. Null);  29 Residual
+Null Deviance:      112400 
+Residual Deviance: 6754         AIC: 297.5 
+
+summary(g)
+Call:
+glm(formula = circumference ~ age + Tree)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-30.505   -8.790    3.737    7.650   21.859  
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 17.399650   5.543461   3.139  0.00388 ** 
+age          0.106770   0.005321  20.066  < 2e-16 ***
+Tree.L      39.935049   5.768048   6.923 1.31e-07 ***
+Tree.Q       2.519892   5.768048   0.437  0.66544    
+Tree.C      -8.267097   5.768048  -1.433  0.16248    
+Tree^4      -4.695541   5.768048  -0.814  0.42224    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+(Dispersion parameter for gaussian family taken to be 232.8927)
+
+    Null deviance: 112366.3  on 34  degrees of freedom
+Residual deviance:   6753.9  on 29  degrees of freedom
+AIC: 297.51
+
+Number of Fisher Scoring iterations: 2
+```
+
+###-------------"if else" statement-----------------------
+
+## Syntax: if (condition) {...} else {...}. && and || can be used in the condition. If else statement can be nested.
+
+```{r}
+## Let's create a vector containing number 1-10:
+samples <- c(rep(1:10)); samples
+ [1]  1  2  3  4  5  6  7  8  9 10
+
+#Print out those sample numbers that are even using if else statement:
+for (thissample in samples)
+{
+    if (thissample %% 2 != 0) next
+    else print(thissample)
+}
+[1] 2
+[1] 4
+[1] 6
+[1] 8
+[1] 10
+
+## The "ifelse"" function is a vectorized version of if else statement. It's syntax is ifelse(condition,v1,v2). if contidion is true, return v1, otherwise v2.
+
+## If we want all samples with number >6 be number 2, and those not be number 1, just:
+ret<-ifelse(samples>6,2,1); ret
+[1] 1 1 1 1 1 1 2 2 2 2
+```
+
+### ----------------"length"" function----------------
+
+## length() function gets or sets the length of a vector (list) or other objects.
+
+```{r}
+## Get vector length:
+x <- c(1,2,5,4,6,1,22,1)
+length(x)
+[1] 8
+
+## Set vector length:
+length(x) <- 4; x
+[1] 1 2 5 4
+
+## Get the length of a list:
+y <- list(batch=3,label="Lung Cancer Patients", subtype=c("A","B","C"))
+y
+$batch
+[1] 3
+$label
+[1] "Lung Cancer Patients"
+$subtype
+[1] "A" "B" "C"
+>is.list(y)
+[1] TURE
+>length(y)
+[1] 3
+
+## If the parameter is a matrix or dataframe, it returns the number of variables:
+length(BOD)
+[1] 2
+
+BOD
+  Time demand
+1    1    8.3
+2    2   10.3
+3    3   19.0
+4    4   16.0
+5    5   15.6
+6    7   19.8
+
+## When resets a list or matrix, if the list is shortened, extra values will be discarded, if the list is lengthened, NAs (or nul) is added to the list.
+length(BOD) <- 1
+BOD
+$Time
+[1] 1 2 3 4 5 7
+
+length(BOD) <- 3
+BOD
+$Time
+[1] 1 2 3 4 5 7
+$demand
+[1]  8.3 10.3 19.0 16.0 15.6 19.8
+[[3]]
+NULL
+
+## length() function can be used for all R objects. For an environment it returns the object number in it. NULL returns 0. Most other objects return length 1.
+```
+
+ 
+###-----------------"linear model" function---------------------
+
+## lm() is a linear model function, such like linear regression analysis.
+
+lm(formula, data, subset, weights, ...)
+formula: model description, such as x ~ y
+data: optional, variables in the model
+subset: optional, a subset vector of observations to be used in the fitting process
+weights: optional, a vector of weights to be used in the fitting process
+
+```{r}
+ ## Let's create two vectors, and then fit a linear model:
+x <- c(rep(1:20))
+y <- x * 2
+f <- lm(x ~ y)
+f
+Call:
+lm(formula = x ~ y)
+
+Coefficients:
+(Intercept)            y  
+ -4.766e-15    5.000e-01  
+ 
+We can use summary() to see the details:
+summary(f)
+Call:
+lm(formula = x ~ y)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-6.208e-15  8.400e-18  3.526e-16  6.074e-16  2.038e-15 
+
+Coefficients:
+              Estimate Std. Error    t value Pr(>|t|)    
+(Intercept) -4.766e-15  7.696e-16 -6.193e+00  7.6e-06 ***
+y            5.000e-01  3.212e-17  1.557e+16  < 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 1.657e-15 on 18 degrees of freedom
+Multiple R-squared:     1,      Adjusted R-squared:     1 
+F-statistic: 2.423e+32 on 1 and 18 DF,  p-value: < 2.2e-16 
+
+Let's plot the results:
+plot(f)
+
+```

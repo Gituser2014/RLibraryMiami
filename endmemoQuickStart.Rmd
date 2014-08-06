@@ -1,0 +1,213 @@
+---
+title: "Endmemo Quick Start"
+author: "Juanjo Moreiras"
+date: "Monday, July 28, 2014"
+output: html_document
+
+###----------------"array"--------------
+
+## Array is R data type which has multiple dimensions. array() function creates or tests for arrays. dim() function defines the dimension of an array. 
+
+array(data=NA, dim=length(data), dimnames=NULL)
+
+data: vector to fill the array
+dim: row and col numbers
+
+```{r}
+x <- array(1:9); x
+[1] 1 2 3 4 5 6 7 8 9
+
+ x <- array(1:9,c(3,3)); x
+     [,1] [,2] [,3]
+[1,]    1    4    7
+[2,]    2    5    8
+[3,]    3    6    9
+
+x <- 1:64; x
+dim(x) <- c(2,4,8)     #dim() converts the vector into array
+is.array(x)
+[1] TRUE
+x
+, , 1
+     [,1] [,2] [,3] [,4]
+[1,]    1    3    5    7
+[2,]    2    4    6    8
+, , 2
+     [,1] [,2] [,3] [,4]
+[1,]    9   11   13   15
+[2,]   10   12   14   16
+, , 3
+     [,1] [,2] [,3] [,4]
+[1,]   17   19   21   23
+[2,]   18   20   22   24
+, , 4
+     [,1] [,2] [,3] [,4]
+[1,]   25   27   29   31
+[2,]   26   28   30   32
+, , 5
+     [,1] [,2] [,3] [,4]
+[1,]   33   35   37   39
+[2,]   34   36   38   40
+, , 6
+     [,1] [,2] [,3] [,4]
+[1,]   41   43   45   47
+[2,]   42   44   46   48
+, , 7
+     [,1] [,2] [,3] [,4]
+[1,]   49   51   53   55
+[2,]   50   52   54   56
+, , 8
+     [,1] [,2] [,3] [,4]
+[1,]   57   59   61   63
+[2,]   58   60   62   64
+
+x[1,,]
+     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+[1,]    1    9   17   25   33   41   49   57
+[2,]    3   11   19   27   35   43   51   59
+[3,]    5   13   21   29   37   45   53   61
+[4,]    7   15   23   31   39   47   55   63
+
+x[1,2,]
+[1]  3 11 19 27 35 43 51 59
+
+x[1,2,1]
+[1] 3
+
+```
+
+### ------------------"Data Frame"------------------
+
+## R data.frame is a powerful data type, especially when processing table (.csv). It can store the data as row and columns according to the table. The difference between data frame and matrix is that the column data of matrix are the same, while the column data of data frame may be of different modes and attributes.
+
+```{r}
+## Let's use the R Data Sets BOD (Biochemical Oxygen Demand), which is a data frame:
+x <- BOD
+is.matrix(x)
+[1] FALSE
+
+is.data.frame(x)
+[1] TRUE
+
+class(x)
+[1] "data.frame"
+x
+  Time demand
+1    1    8.3
+2    2   10.3
+3    3   19.0
+4    4   16.0
+5    5   15.6
+6    7   19.8
+
+## as.data.frame() can coerce a list into a data frame, providing that the components of the list conforms to the restrictions of a data frame.
+## Each row of the data frame is a list or a data frame with one row
+y <- x[2,]
+is.list(y)
+[1] TRUE
+
+is.data.frame(y)
+[1] TRUE
+
+## Access the column of the data frame:
+x$Time
+[1] 1 2 3 4 5 7
+x$demand
+[1]  8.3 10.3 19.0 16.0 15.6 19.8
+
+## A convenient way to access the columns of a data frame is using attach(), detach() statement. e.g. after attach(x), the column 'x$demand' can be accessed by simply typing 'demand'.
+attach(x)
+demand
+[1]  8.3 10.3 19.0 16.0 15.6 19.8
+
+## Statement detach() is the reverse statement of attach().
+detach(x)
+demand
+Error: object 'demand' not found
+```
+
+###---------------"date" and "time" Functions------------------
+
+## R has serveral date and time related functions. date() functions returns a date without time as character string. Sys.Date() and Sys.time() returns the system's date and time as a Date and POSIXlt/POSIXct object respectively.
+
+```{r}
+date()
+[1] "Fri Jan 04 17:38:05 2013"
+Sys.time()
+[1] "2013-01-04 17:47:39 EST"
+Sys.Date()
+[1] "2013-01-04"
+class(date())
+[1] "character"
+class(Sys.Date())
+[1] "Date"
+class(Sys.time())
+[1] "POSIXct" "POSIXt" 
+
+## POSIXct contains seconds from 1970. POSIXlt is a list, contains:
+x <- "19:18:05"
+y <- strptime(x,"%H:%M:%S"); y
+[1] "2013-01-04 19:18:05"
+class(y)
+[1] "POSIXlt" "POSIXt"
+y$sec
+[1] 5
+```
+
+###-----------Matrix"------------
+
+## Matrix is a two dimensional array. R has a lot of operator and functions that make matrix handling very convenient.
+
+```{r}
+## Matrix assignment:
+A <- matrix(c(3,5,7,1,9,4),nrow=3,ncol=2,byrow=TRUE); A
+     [,1] [,2]
+[1,]    3    5
+[2,]    7    1
+[3,]    9    4
+
+## Matrix row and column count
+rA <- nrow(A); rA
+[1] 3
+
+cA <- ncol(A); cA
+[1] 2
+
+## t(A) function returns a transposed matrix of A:
+B <- t(A); B
+     [,1] [,2] [,3]
+[1,]    3    7    9
+[2,]    5    1    4
+
+## Matrix multplication:
+C <- A * A; C
+     [,1] [,2]
+[1,]    9   25
+[2,]   49    1
+[3,]   81   16
+
+## Matrix Addition:
+>C <- A + A; C
+     [,1] [,2]
+[1,]    6   10
+[2,]   14    2
+[3,]   18    8
+
+```
+
+###--------- Vector---------------
+
+## Vector data type is similar to array of other programming languages. It's consisted of an ordered number of elements. The elements can be numeric (integer, double), logical, character, complex, or raw.
+```{r}
+## Vector assignment
+v <- c(2,3,5.5,7.1,2.1,3); v 
+[1] 2.0 3.0 5.5 7.1 2.1 3.0
+
+## Under default mode "any", logical, number, character are treated as vectors with length 1. It will retrun FALSE only if the object being judged has name attribute. Under mode "numeric", is.vector will return true for vectors of types integer or double. and mode "integer" can only be true for vectors of type integer.
+
+## Other methods for generating regular vectors:
+v <- 1:10; v
+v <- rep(2,10); v
+v <- seq(1,5,by=0.5); v
+v <- seq(length=10,from=1,by=0.5); v
+```

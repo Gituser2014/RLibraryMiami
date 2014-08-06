@@ -1,0 +1,224 @@
+---
+title       : Summarizing data
+subtitle    : 
+author      : Jeffrey Leek 
+job         : Johns Hopkins Bloomberg School of Public Health
+logo        : bloomberg_shield.png
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow   # 
+url:
+  lib: ../../librariesNew
+  assets: ../../assets
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+---
+
+
+```{r setup, cache = F, echo = F, message = F, warning = F, tidy = F}
+# make this an external chunk that can be included in any file
+options(width = 100)
+opts_chunk$set(message = F, error = F, warning = F, comment = NA, fig.align = 'center', dpi = 100, tidy = F, cache.path = '.cache/', fig.path = 'fig/', cache=TRUE)
+
+options(xtable.type = 'html')
+knit_hooks$set(inline = function(x) {
+  if(is.numeric(x)) {
+    round(x, getOption('digits'))
+  } else {
+    paste(as.character(x), collapse = ', ')
+  }
+})
+knit_hooks$set(plot = knitr:::hook_plot_html)
+```
+
+
+## Example data set 
+
+<img class=center src="../../assets/img/03_ObtainingData/restaurants.png" height=500 />
+
+
+[https://data.baltimorecity.gov/Community/Restaurants/k5ry-ef3g](https://data.baltimorecity.gov/Community/Restaurants/k5ry-ef3g)
+
+---
+
+## Getting the data from the web
+
+```{r getData}
+## setting the working directory
+setwd("~/DataScientist/RUcla")    
+
+if(!file.exists("./data")){dir.create("./RUclaData")}
+fileUrl <- "https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD"
+download.file(fileUrl,destfile="./RUclaData/restaurants.csv")
+restData <- read.csv("./RUclaData/restaurants.csv")
+
+```
+
+## Look at a bit of the data
+
+```{r ,dependson="getData"}
+
+head(restData,n=3)
+#  name zipCode neighborhood councilDistrict policeDistrict                        Location.1
+1   410   21206    Frankford               2   NORTHEASTERN 4509 BELAIR ROAD\nBaltimore, MD\n
+2  1919   21231  Fells Point               1   SOUTHEASTERN    1919 FLEET ST\nBaltimore, MD\n
+3 SAUTE   21224       Canton               1   SOUTHEASTERN   2844 HUDSON ST\nBaltimore, MD\n
+
+tail(restData,n=3)
+
+## More in detail
+summary(restData)
+str(restData)
+
+```
+
+## Quantiles of quantitative variables
+
+```{r ,dependson="getData"}
+
+quantile(restData$councilDistrict,na.rm=TRUE)
+0%  25%  50%  75% 100% 
+   1    2    9   11   14 
+quantile(restData$councilDistrict,probs=c(0.5,0.75,0.9))
+50% 75% 90% 
+  9  11  12 
+
+```
+
+## Make table
+
+```{r ,dependson="getData"}
+
+table(restData$zipCode,useNA="ifany")
+
+-21226  21201  21202  21205  21206  21207  21208  21209  21210  21211  21212  21213  21214  21215  21216  21217 
+     1    136    201     27     30      4      1      8     23     41     28     31     17     54     10     32 
+ .....................
+
+table(restData$councilDistrict,restData$zipCode)
+
+```
+
+## Check for missing values
+
+```{r ,dependson="getData"}
+
+sum(is.na(restData$councilDistrict))
+[1] 0
+
+any(is.na(restData$councilDistrict))
+[1] FALSE
+
+all(restData$zipCode > 0)
+[1] FALSE
+
+```
+
+## Row and column sums
+
+```{r,dependson="getData"}
+colSums(is.na(restData))
+           name         zipCode    neighborhood councilDistrict  policeDistrict      Location.1 
+              0               0               0               0               0               0 
+
+all(colSums(is.na(restData))==0)
+[1] TRUE
+
+```
+
+## Values with specific characteristics
+
+```{r,dependson="getData"}
+
+table(restData$zipCode %in% c("21212"))
+FALSE  TRUE 
+ 1299    28 
+
+table(restData$zipCode %in% c("21212","21213"))
+FALSE  TRUE 
+ 1268    59 
+
+restData[restData$zipCode %in% c("21212","21213"),]
+
+```
+
+## Cross tabs
+## Working with another data set
+
+```{r adm}
+data(UCBAdmissions)
+DF = as.data.frame(UCBAdmissions)
+summary(DF)
+     Admit       Gender   Dept       Freq      
+ Admitted:12   Male  :12   A:4   Min.   :  8.0  
+ Rejected:12   Female:12   B:4   1st Qu.: 80.0  
+                           C:4   Median :170.0  
+                           D:4   Mean   :188.6  
+                           E:4   3rd Qu.:302.5  
+                           F:4   Max.   :512.0  
+```
+
+## Cross tabs
+
+```{r ,dependson="adm"}
+
+xt <- xtabs(Freq ~ Gender + Admit,data=DF); xt
+        Admit
+Gender   Admitted Rejected
+  Male       1198     1493
+  Female      557     1278
+
+```
+
+## Flat tables
+
+```{r wb}
+
+warpbreaks$replicate <- rep(1:9, len = 54)
+xt = xtabs(breaks ~.,data=warpbreaks); xt
+#, , replicate = 1
+
+    tension
+wool  L  M  H
+   A 26 18 36
+   B 27 42 20
+
+, , replicate = 2
+
+    tension
+wool  L  M  H
+   A 30 21 21
+   B 14 26 21
+.....
+
+```
+
+## Flat tables
+
+```{r ,dependson="wb"}
+
+ftable(xt)
+             replicate  1  2  3  4  5  6  7  8  9
+wool tension                                     
+A    L                 26 30 54 25 70 52 51 26 67
+     M                 18 21 29 17 12 18 35 30 36
+     H                 36 21 24 18 10 43 28 15 26
+B    L                 27 14 29 19 29 31 41 20 44
+     M                 42 26 19 16 39 28 21 39 29
+     H                 20 21 24 17 13 15 15 16 28
+
+```
+
+## Size of a data set
+
+```{r}
+fakeData = rnorm(1e5)
+object.size(fakeData)
+print(object.size(fakeData),units="Mb")
+```
+
+
+
+
+
+

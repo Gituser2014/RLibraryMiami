@@ -1,0 +1,329 @@
+---
+title: "Entering Data"
+author: "Juanjo Moreiras"
+date: "Wednesday, July 23, 2014"
+output: html_document
+---
+
+### Functions to remember
+
+```{r}
+# read.table
+mydata <- read.table("data.table", sep= ",", header=TRUE)
+                     
+# read.csv
+mydata <- read.csv("data.csv")
+
+# read.dta
+library(foreign)
+mydata <- read.dta("dataStata.dta")  ## read stata data files
+mydata
+save                 ## saves as an R object
+dir()                ## checking if RData.rda was created
+load                 ## load the R data into memory
+dim                  ## dimensions of an object
+ls                   ## checking if everything is gone
+rm                   ## remove objects
+rm(list=ls())        ## clear everything out of memory
+
+------------------
+
+### get(), set() your working directory
+
+* The main commands are ```getwd()``` and ```setwd()```. 
+* Be aware of relative versus absolute paths
+  * __Relative__ - ```setwd("./data")```, ```setwd("../")```
+  * __Absolute__ - ```setwd("C:\Users\Juanjo\DataScientist\RUcla\RUclaData")```
+  * Important difference in Windows ```setwd("C:\\Users\\Andrew\\Downloads")```
+
+--------------------
+
+## Checking for a "data" directory and creating it if it doesn't exist
+
+```{r data}
+if(!file.exists("data")){
+  dir.create("data")
+}
+```
+
+### Example 01
+
+## Download a file from the web and then
+## Download the file to load, and
+## Loading flat files - read.table(); read.csv()
+## Remember setwd("./abcData") moves one directory down from home directory 
+## Remember setwd("../") moves it up one directory
+## Setting working directory
+    ## Rstudio--Session-->Set Working Directory-->Choose Directory-->RUcla
+
+```{r,Jeff getting data}
+
+getwd () 
+# "C:/Users/Juanjo/DataScientist/RUcla"
+
+## Download a file from the web
+fileUrl <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.csv?accessType=DOWNLOAD"
+download.file(fileUrl, destfile = "./RUclaData/cameras.csv")
+list.files("./RUclaData")
+dateDownloaded <- date()
+dateDownloaded
+# [1] "Sun Jan 12 21:37:44 2014"
+
+## Download the file to load
+fileUrl <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.csv?accessType=DOWNLOAD"
+download.file(fileUrl, destfile = "./RUclaData/cameras.csv")
+dateDownloaded <- date()
+
+## Loading flat files - read.table(); read.csv()
+## read.table()
+cameraData <- read.table("./RUclaData/cameras.csv", sep = ",", header = TRUE)
+## read.csv()
+cameraData <- read.csv("./RUclaData/cameras.csv")
+
+```
+### Example 02
+## Download a file from the web
+## save it as an R data file
+## Setting working directory
+    ## Rstudio--Session--Set Working Directory--Choose Directory--RUcla/RUclaData
+
+```{r}
+getwd()
+# "C:/Users/Juanjo/DataScientist/RUcla/RUclaData"
+
+Ucla1 <- read.table("http://www.ats.ucla.edu/stat/data/hsb2.txt",
+                    header=TRUE, sep = "\t")
+dateDownloaded <- date()
+
+save(Ucla1,file="Ucla1.rda")
+load("Ucla1.rda")                  
+tail(Ucla1)
+rm(list=ls())                  
+dir()                           
+
+```
+### Some important parameters
+
+## quote - you can tell R whether there are any quoted values quote="" means no quotes.
+## na.strings - set the character that represents a missing value.
+## nrows - how many rows to read of the file (e.g. nrows=10 reads 10 lines).
+## skip - number of lines to skip before starting to read
+
+-------------------
+
+## Reading Excel files
+## read.xlsx(), read.xlsx2() {xlsx package}
+
+```{r Jeff getting data}
+
+if(!file.exists("data")){dir.create("data")}
+fileUrl <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.xlsx?accessType=DOWNLOAD"
+download.file(fileUrl,destfile="./RUclaData/cameras.xlsx")
+dateDownloaded <- date()
+
+library(xlsx)
+cameraData <- read.xlsx("./RUclaData/cameras.xlsx",sheetIndex=1,header=TRUE)
+head(cameraData)
+
+```
+
+## Reading specific rows and columns
+
+```{r Jeff}
+colIndex <- 2:3
+rowIndex <- 1:4
+cameraDataSubset <- read.xlsx("./RUclaData/cameras.xlsx",sheetIndex=1,
+                              colIndex=colIndex,rowIndex=rowIndex)
+cameraDataSubset
+
+```
+
+## Reading XML files
+
+```{r Jeff getting data}
+## Read the file into R
+library(XML)
+fileUrl <- "http://www.w3schools.com/xml/simple.xml"
+doc <- xmlTreeParse(fileUrl,useInternal=TRUE)
+rootNode <- xmlRoot(doc)
+xmlName(rootNode)
+names(rootNode)
+
+## Directly access parts of the XML document
+rootNode[[1]]
+rootNode[[1]][[1]]
+
+## Programatically extract parts of the file
+xmlSApply(rootNode,xmlValue)
+
+```
+## XPath
+
+* _/node_ Top level node
+* _//node_ Node at any level
+* _node[@attr-name]_ Node with an attribute name
+* _node[@attr-name='bob']_ Node with attribute name attr-name='bob'
+
+```{r Jeff: Getting Data}
+## Get the items on the menu and prices
+xpathSApply(rootNode,"//name",xmlValue)
+xpathSApply(rootNode,"//price",xmlValue)
+
+```
+### mySQL
+
+* Free and widely used open source database software
+* Widely used in internet based applications
+* Data are structured in 
+  * Databases
+  * Tables within databases
+  * Fields within tables
+* Each row is called a record
+
+[http://en.wikipedia.org/wiki/MySQL](http://en.wikipedia.org/wiki/MySQL)
+[http://www.mysql.com/](http://www.mysql.com/)
+
+```{r}
+## Step 1 - Install MySQL
+img class=center src=../../assets/img/03_ObtainingData/installmysql.png height=450>
+[http://dev.mysql.com/doc/refman/5.7/en/installing.html](http://dev.mysql.com/doc/refman/5.7/en/installing.html)
+
+```
+
+## Step 2 - Install RMySQL
+
+* On a Mac: ```install.packages("RMySQL")```
+* On Windows: 
+  * Official instructions - [http://biostat.mc.vanderbilt.edu/wiki/Main/RMySQL](http://biostat.mc.vanderbilt.edu
+
+------
+
+## Example - UCSC database
+
+img class=center src=../../assets/img/03_ObtainingData/ucsc.png height=450>
+[http://genome.ucsc.edu/](http://genome.ucsc.edu/)
+
+-------
+
+## UCSC MySQL
+
+<img class=center src=../../assets/img/03_ObtainingData/ucscmysql.png height=450>
+[http://genome.ucsc.edu/goldenPath/help/mysql.html](http://genome.ucsc.edu/goldenPath/help/mysql.html)
+
+---
+
+## Connecting and listing databases
+
+```{r}
+ucscDb <- dbConnect(MySQL(),user="genome", 
+                    host="genome-mysql.cse.ucsc.edu")
+result <- dbGetQuery(ucscDb,"show databases;"); dbDisconnect(ucscDb);
+result
+
+```
+
+## Connecting to hg19 and listing tables
+
+```{r}
+hg19 <- dbConnect(MySQL(),user="genome", db="hg19",
+                    host="genome-mysql.cse.ucsc.edu")
+allTables <- dbListTables(hg19)
+length(allTables)
+allTables[1:5]
+
+```
+
+## Get dimensions of a specific table
+
+```{r}
+dbListFields(hg19,"affyU133Plus2")
+dbGetQuery(hg19, "select count(*) from affyU133Plus2")
+```
+## Read from the table
+```{r}
+affyData <- dbReadTable(hg19, "affyU133Plus2")
+head(affyData)
+```
+## Select a specific subset
+```{r}
+query <- dbSendQuery(hg19, "select * from affyU133Plus2 where misMatches between 1 and 3")
+affyMis <- fetch(query); quantile(affyMis$misMatches)
+affyMisSmall <- fetch(query,n=10); dbClearResult(query);
+dim(affyMisSmall)
+```
+## Don't forget to close the connection!
+```{r}
+dbDisconnect(hg19)
+```
+
+### Reading from the web
+## Webscraping. It can be a great way to get data
+
+------
+
+## Example: Google scholar
+
+<img class=center src=../../assets/img/googlescholar.png height=500>
+
+[http://scholar.google.com/citations?user=HI-I6C0AAAAJ&hl=en](http://scholar.google.com/citations?user=HI-I6C0AAAAJ&hl=en)
+
+## Getting data off webpages - readLines()
+
+```{r}
+con = url("http://scholar.google.com/citations?user=HI-I6C0AAAAJ&hl=en")
+htmlCode = readLines(con)
+close(con)
+htmlCode
+
+```
+
+## Parsing with XML
+
+```{r}
+library(XML)
+url <- "http://scholar.google.com/citations?user=HI-I6C0AAAAJ&hl=en"
+html <- htmlTreeParse(url, useInternalNodes=T)
+
+xpathSApply(html, "//title", xmlValue)
+xpathSApply(html, "//td[@id='col-citedby']", xmlValue)
+
+```
+
+## GET from the httr package
+
+```{r}}
+library(httr); html2 = GET(url)
+content2 = content(html2,as="text")
+parsedHtml = htmlParse(content2,asText=TRUE)
+xpathSApply(parsedHtml, "//title", xmlValue)
+
+```
+
+## Accessing websites with passwords
+
+```{r}
+pg1 = GET("http://httpbin.org/basic-auth/user/passwd")
+pg1
+#Response [http://httpbin.org/basic-auth/user/passwd]
+  Status: 401
+  Content-type:
+```
+
+## Using handles
+
+```{r}
+google = handle("http://google.com")
+pg1 = GET(handle=google,path="/")
+pg2 = GET(handle=google,path="search")
+
+```
+
+## Accessing Twitter from R
+
+```{r,eval=FALSE}
+myapp = oauth_app("twitter",
+                   key="yourConsumerKeyHere",secret="yourConsumerSecretHere")
+sig = sign_oauth1.0(myapp,
+                     token = "yourTokenHere",
+                      token_secret = "yourTokenSecretHere")
+homeTL = GET("https://api.twitter.com/1.1/statuses/home_timeline.json", sig)

@@ -1,0 +1,179 @@
+---
+title       : Merging data
+subtitle    : 
+author      : Jeffrey Leek 
+job         : Johns Hopkins Bloomberg School of Public Health
+logo        : bloomberg_shield.png
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow   # 
+url:
+  lib: ../../libraries
+  assets: ../../assets
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+---
+
+
+```{r setup, cache = F, echo = F, message = F, warning = F, tidy = F}
+# make this an external chunk that can be included in any file
+options(width = 100)
+opts_chunk$set(message = F, error = F, warning = F, comment = NA, fig.align = 'center', dpi = 100, tidy = F, cache.path = '.cache/', fig.path = 'fig/', cache=TRUE)
+
+options(xtable.type = 'html')
+knit_hooks$set(inline = function(x) {
+  if(is.numeric(x)) {
+    round(x, getOption('digits'))
+  } else {
+    paste(as.character(x), collapse = ', ')
+  }
+})
+knit_hooks$set(plot = knitr:::hook_plot_html)
+```
+---
+
+## Peer review experiment data
+
+<img class=center src="../../assets/img/03_ObtainingData/cooperation.png" height=500 />
+
+
+[http://www.plosone.org/article/info:doi/10.1371/journal.pone.0026895](http://www.plosone.org/article/info:doi/10.1371/journal.pone.0026895)
+
+---
+
+## Peer review data
+
+```{r reviewDownload, cache=TRUE}
+> getwd()
+[1] "C:/Users/Juanjo/DataScientist/RUcla"
+
+if(!file.exists("./data")){dir.create("./dataGettingJJ")}
+fileUrl1 = "https://dl.dropboxusercontent.com/u/7710864/data/reviews-apr29.csv"
+fileUrl2 = "https://dl.dropboxusercontent.com/u/7710864/data/solutions-apr29.csv"
+download.file(fileUrl1,destfile="./RUclaData/reviews.csv")
+download.file(fileUrl2,destfile="./RUclaData/solutions.csv")
+reviews <- read.csv("./RUclaData/reviews.csv"); solutions <- read.csv("./RUclaData/solutions.csv")
+head(reviews,2)
+ id solution_id reviewer_id      start       stop time_left accept
+1  1           3          27 1304095698 1304095758      1754      1
+2  2           4          22 1304095188 1304095206      2306      1
+head(solutions,2)
+  id problem_id subject_id      start       stop time_left answer
+1  1        156         29 1304095119 1304095169      2343      B
+2  2        269         25 1304095119 1304095183      2329      C
+```
+
+## Merging data - merge()
+
+* Merges data frames
+* Important parameters: _x_,_y_,_by_,_by.x_,_by.y_,_all_
+
+```{r, dependson="reviewDownload"}
+names(reviews)
+names(solutions)
+```
+
+## Merging data - merge()
+
+```{r, dependson="reviewDownload"}
+mergedData <- merge(reviews,solutions,by.x="solution_id",by.y="id",all=TRUE)
+head(mergedData)
+  solution_id id reviewer_id    start.x     stop.x time_left.x accept problem_id subject_id    start.y     stop.y time_left.y answer
+1           1  4          26 1304095267 1304095423        2089      1        156         29 1304095119 1304095169        2343      B
+2           2  6          29 1304095471 1304095513        1999      1        269         25 1304095119 1304095183        2329      C
+3           3  1          27 1304095698 1304095758        1754      1         34         22 1304095127 1304095146        2366      C
+4           4  2          22 1304095188 1304095206        2306      1         19         23 1304095127 1304095150        2362      D
+5           5  3          28 1304095276 1304095320        2192      1        605         26 1304095127 1304095167        2345      A
+6           6 16          22 1304095303 1304095471        2041      1        384         27 1304095131 1304095270        2242      C
+
+```
+
+## Default - merge all common column names
+
+```{r, dependson="reviewDownload"}
+intersect(names(solutions),names(reviews))
+[1] "id"        "start"     "stop"      "time_left"
+
+mergedData2 = merge(reviews,solutions,all=TRUE)
+head(mergedData2)
+ id      start       stop time_left solution_id reviewer_id accept problem_id subject_id answer
+1  1 1304095119 1304095169      2343          NA          NA     NA        156         29      B
+2  1 1304095698 1304095758      1754           3          27      1         NA         NA   <NA>
+3  2 1304095119 1304095183      2329          NA          NA     NA        269         25      C
+4  2 1304095188 1304095206      2306           4          22      1         NA         NA   <NA>
+5  3 1304095127 1304095146      2366          NA          NA     NA         34         22      C
+6  3 1304095276 1304095320      2192           5          28      1         NA         NA   <NA>
+```
+
+## Using join in the plyr package 
+
+_Faster, but less full featured - defaults to left join, see help file for more_
+
+```{r }
+df1 <- data.frame(id=sample(1:10),x=rnorm(10)); df1
+   id           x
+1   2 -1.35737456
+2   7 -0.21935540
+3   4 -0.90220938
+4   6  0.56417213
+5   1  0.19410123
+6   8  0.02226644
+7  10  0.43508329
+8   9  1.22237658
+9   3 -0.55838807
+10  5 -0.44656863
+
+df2 = data.frame(id=sample(1:10),y=rnorm(10)); df2
+   id          y
+1   7  0.6379899
+2  10 -1.5734357
+3   5 -1.1302262
+4   9 -2.0547480
+5   8  0.9847844
+6   2  0.2313660
+7   3  0.7561829
+8   1 -1.6800593
+9   6  0.3164570
+10  4 -1.2088910
+
+arrange(join(df1,df2),id)
+   id          x           y
+1   1  0.9173463  0.78541641
+2   2 -2.1002662  0.57057136
+3   3 -1.5711931 -0.31776016
+4   4  1.1787154  0.02257208
+5   5  0.7844900 -0.92385920
+6   6  0.1763595  0.42903300
+7   7  0.1840629  1.71992071
+8   8  0.5903302 -1.67681858
+9   9 -0.5360780 -0.50776959
+10 10  1.7658905 -1.66323766
+```
+
+## If you have multiple data frames
+
+```{r}
+df1 = data.frame(id=sample(1:10),x=rnorm(10))
+df2 = data.frame(id=sample(1:10),y=rnorm(10))
+df3 = data.frame(id=sample(1:10),z=rnorm(10))
+dfList = list(df1,df2,df3)
+join_all(dfList)
+   id          x          y          z
+1   3 -0.1604471 -0.2632383 -0.7028608
+2   1 -2.2909906 -0.3875612 -0.2640006
+3   8 -1.8895531 -0.1909728 -0.7309444
+4  10 -0.9111194  1.1412796 -0.8618497
+5   7 -1.0367547  0.9889156  1.0353976
+6   4  0.4102209 -0.2391343 -0.3319999
+7   2 -0.4220342  2.2090558 -1.3136163
+8   6 -0.5776855 -1.1630536  0.9629428
+9   5 -0.7098732  2.4425729 -0.4591597
+10  9 -1.6203401  0.7631218 -2.1867680
+
+```
+
+## More on merging data
+
+* The quick R data merging page - [http://www.statmethods.net/management/merging.html](http://www.statmethods.net/management/merging.html)
+* plyr information - [http://plyr.had.co.nz/](http://plyr.had.co.nz/)
+* Types of joins - [http://en.wikipedia.org/wiki/Join_(SQL)](http://en.wikipedia.org/wiki/Join_(SQL))

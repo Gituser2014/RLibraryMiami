@@ -1,0 +1,323 @@
+---
+title: "Endmemo Function A-Fa"
+author: "Juanjo Moreiras"
+date: "Monday, July 28, 2014"
+output: html_document
+
+---
+###------------------"apply"function-------------
+
+## apply; lapply sapply
+## apply() function applies a function to margins of an array or matrix.
+## apply(x,margin,func, ...)
+. x: array
+. margin: subscripts, for matrix, 1 for row, 2 for column
+. func: the function
+
+```{r}
+BOD    #R built-in dataset, Biochemical Oxygen Demand
+  Time demand
+1    1    8.3
+2    2   10.3
+3    3   19.0
+4    4   16.0
+5    5   15.6
+6    7   19.8
+
+## Sum up for each row:
+apply(BOD,1,sum)
+[1]  9.3 12.3 22.0 20.0 20.6 26.8
+
+## Sum up for each column:
+apply(BOD,2,sum)
+  Time demand 
+    22     89 
+
+## Multipy all values by 10:
+apply(BOD,1:2,function(x) 10 * x)
+     Time demand
+[1,]   10     83
+[2,]   20    103
+[3,]   30    190
+[4,]   40    160
+[5,]   50    156
+[6,]   70    198
+
+## Used for array, margin set to 1:
+x <- array(1:9)
+apply(x,1,function(x) x * 10)
+[1] 10 20 30 40 50 60 70 80 90
+
+## Two dimension array, margin can be 1 or 2:
+x <- array(1:9,c(3,3)); x
+     [,1] [,2] [,3]
+[1,]    1    4    7
+[2,]    2    5    8
+[3,]    3    6    9
+
+## lapply() function can handle data frame with similar results, return is a list:
+lapply(BOD,sum)
+$Time
+[1] 22
+$demand
+[1] 89
+
+lapply(BOD,mean)
+$Time
+[1] 3.666667
+$demand
+[1] 14.83333
+
+## sapply() has similar function, it defines "simplify=TRUE" by default, thus return a vector:
+sapply(BOD,sum)
+  Time demand 
+    22     89 
+sapply(BOD,sum,simplify=FALSE)
+$Time
+[1] 22
+$demand
+[1] 89
+```
+
+###-----------------R "attach"" function----------------
+
+## attach(x)
+## x: dataframe, matrix, list
+
+```{r}
+setwd("~/DataScientist/RUcla/RUclaData")
+x <- read.csv("anova.csv",header=T,sep=",")
+
+## We can't use the variable "Gender" in R Search Path:
+gender
+## we have to use
+x$gender
+## After attach the object "x", "Gender" can be used globally:
+attach(x)
+gender
+[1] m m m m m f m m f m m f m m m m f m m m m m m f m m m f m m m m f m m m m
+ [38] m m m m m m m m m f m f m m m m m f m m f m m f m m m m f m m m m m m m m..............................
+detach() function reverses the process:
+>detach(x)
+```
+
+### ---------- "cbind"" function---------------
+
+## cbind() function combines vector, matrix or data frame by columns.
+cbind(x1,x2,...)
+x1,x2:vector, matrix, data frames
+
+## data1.csv:
+A,m,-0.54
+A,f,-0.8
+B,f,-1.03
+C,m,-0.41
+
+## data2.csv:
+32,New York
+21,Houston
+34,Seattle
+67,Houston
+
+```{r}
+##Read in the data from the file:
+x <- read.csv("data1.csv",header=T,sep=",")
+x2 <- read.csv("data2.csv",header=T,sep=","); x3
+x3 <- cbind(x,x2)
+  Subtype Gender Expression Age     City
+1       A      m      -0.54  32 New York
+2       A      f      -0.80  21  Houston
+3       B      f      -1.03  34  Seattle
+4       C      m      -0.41  67  Houston
+
+The row number of the two datasets must be equal.
+```
+
+###----------------"cut" function--------------
+
+## cut() function divides a numeric vector into different ranges. 
+## cut(x, breaks, labels = NULL,
+    include.lowest = FALSE, right = TRUE, dig.lab = 3,
+    ordered_result = FALSE, ...)
+. x: numeric vector
+. breaks: break points, number or numeric vector.
+. labels: level labels, character vector.
+
+```{r}
+x <- stats::rnorm(100); x
+> x
+  [1] -0.154103462  0.271704132 -0.234160855  0.764474679  0.438237645
+  [6] -0.763854668  1.303402711  0.051660328  1.064258570  0.079144697
+ [11] -0.704381407  2.239763673 -0.749203152  0.601148921 -0.174814689
+   ...............
+[96] -2.025528709  0.949853574 -0.917568904 -1.103676434  0.728284402
+
+## Divide the data into ranges -5 ~ 5:
+c <- cut(x,breaks=-5:5); c
+  [1] (-1,0]  (0,1]   (-1,0]  (0,1]   (0,1]   (-1,0]  (1,2]   (0,1]   (1,2]  
+ [10] (0,1]   (-1,0]  (2,3]   (-1,0]  (0,1]   (-1,0]  (0,1]   (0,1]   (-1,0] 
+ [19] (-2,-1] (0,1]   (0,1]   (-1,0]  (0,1]   (0,1]   (-1,0]  (-1,0]  (-1,0] .............
+ [91] (1,2]   (-1,0]  (-1,0]  (-1,0]  (1,2]   (-3,-2] (0,1]   (-1,0]  (-2,-1]
+[100] (0,1] 
+10 Levels: (-5,-4] (-4,-3] (-3,-2] (-2,-1] (-1,0] (0,1] (1,2] (2,3] ... (4,5]
+
+## Check the data distribution in different ranges:
+summary(c)        #or table(c)
+(-5,-4] (-4,-3] (-3,-2] (-2,-1]  (-1,0]   (0,1]   (1,2]   (2,3]   (3,4]   (4,5] 
+      0       0       2      14      35      38      10       1       0       0 
+
+## Now, the numbers are divided into 10 levels, the default step is 1. Some levels are empty. Let's try just define the total level number:
+x <- stats::rnorm(100)           #random numbers, different every time
+c <- cut(x,breaks=10,dig.lab=2)
+summary(c)
+(-2,-1.6]   (-1.6,-1.1]  (-1.1,-0.69] (-0.69,-0.24]  (-0.24,0.21] 
+            5             5            13            20            18 
+  (0.21,0.65]    (0.65,1.1]     (1.1,1.5]       (1.5,2]       (2,2.4] 
+           12            14             6             3             4 
+
+## Next, label all the levels:
+x <- stats::rnorm(100)                 #random numbers, different every time
+c <- cut(x,breaks=10,dig.lab=2,labels=1:10)
+summary(c)
+ 1  2  3  4  5  6  7  8  9 10 
+ 5  5 13 20 18 12 14  6  3  4
+
+## Try again, divide into different ranges (break points):
+x <- stats::rnorm(100) #random numbers, different every time
+c <- cut(x,breaks=c(-2,0,1,2))
+table(c)
+-2,0]  (0,1]  (1,2] 
+    52     32     11 
+```
+
+###------------------"density" function--------------
+
+## density() function computes kernel density estimates.
+density(x, bw = "nrd0", adjust = 1,
+        kernel = c("gaussian", "epanechnikov", "rectangular",
+                   "triangular", "biweight",
+                   "cosine", "optcosine"),
+        weights = NULL, window = kernel, width,
+        give.Rkern = FALSE,
+        n = 512, from, to, cut = 3, na.rm = FALSE, ...)
+x: number vector
+bw: smoothing bandwidth
+
+```{r}
+## Let generate 100 numbers randomly:
+x <- stats::rnorm(100); x
+ [1] -0.154103462  0.271704132 -0.234160855  0.764474679  0.438237645
+  [6] -0.763854668  1.303402711  0.051660328  1.064258570  0.079144697
+.................
+[91]  1.570993774 -0.876630726 -0.343492831 -0.480549452  1.494723381
+ [96] -2.025528709  0.949853574 -0.917568904 -1.103676434  0.728284402
+
+d <- density(x); d
+Call:
+      density.default(x = x)
+Data: x (100 obs.);     Bandwidth 'bw' = 0.3184
+       x                 y            
+ Min.   :-3.7891   Min.   :0.0001413  
+ 1st Qu.:-2.0431   1st Qu.:0.0117442  
+ Median :-0.2971   Median :0.0627054  
+ Mean   :-0.2971   Mean   :0.1430424  
+ 3rd Qu.: 1.4489   3rd Qu.:0.2957362  
+ Max.   : 3.1949   Max.   :0.4192181 
+
+## Plot the density:
+plot(density(x),xlim=c(-4,4),col="blueviolet")
+```
+
+###---------------"dim" function-------------
+
+## dim() function gets or sets the dimension of a matrix, array or data frame.
+dim(x)
+x: array, matrix or data frame.
+
+```{r}
+BOD #R Biochemical Oxygen Demand Dataset
+  Time demand
+1    1    8.3
+2    2   10.3
+3    3   19.0
+4    4   16.0
+5    5   15.6
+6    7   19.8
+
+class(BOD)
+[1] "data.frame"
+
+dim(BOD) #get dimension
+[1] 6 2
+
+##Set dimension of a matrix:
+x <- rep(1:20); x
+
+##Set dimension to 2 × 5:
+dim(x) <- c(2,10); x
+
+```
+
+###-------------"exp" function--------------
+
+## exp(x) function compute the exponential value of a number or number vector, ex.
+
+```{r}
+x <- 5
+exp(x)
+[1] 148.4132
+
+y <- rep(1:20)
+exp(y)
+         [,1]     [,2]     [,3]     [,4]      [,5]
+[1,] 2.718282 20.08554 148.4132 1096.633  8103.084
+[2,] 7.389056 54.59815 403.4288 2980.958 22026.466
+
+## ^ operator calculates a raised to power b:
+2^3
+[1] 8
+
+4 ^ (1/2)
+[1] 2
+
+```
+
+###------------------"factor" function--------------
+
+## Factors variable is a vector of categorical data. factor() function creates a factor variable, and calculates the categorical distribution of a vector data.
+
+factor(x = character(), levels, labels = levels,
+       exclude = NA, ordered = is.ordered(x))
+
+x: a vector of data
+
+```{r}
+v <- c(1,3,5,8,2,1,3,5,3,5)
+is.factor(v)
+[1] FALSE
+
+## Calculates the categorical distribution:
+factor(v)
+ [1] 1 3 5 8 2 1 3 5 3 5
+Levels: 1 2 3 5 8
+
+x <- factor(v); x
+ [1] 1 3 5 8 2 1 3 5 3 5
+Levels: 1 2 3 5 8
+
+is.factor(x)
+[1] TRUE
+
+## Select levels:
+x <- factor(v, levels=c(2,1)); x
+ [1] 1    <NA> <NA> <NA> 2    1    <NA> <NA> <NA> <NA>
+Levels: 2 1
+
+## Change the level value:
+levels(x) <- c("two","one"); x
+ [1] one    <NA> <NA> <NA> two    one    <NA> <NA> <NA> <NA>
+Levels: two one
+```
+
+ 
+ 

@@ -1,0 +1,1052 @@
+
+###______________R BASICS_________________
+
+### ls()  ## lists the objects in your workspace
+### ist.files() lists the files located in the folder's workspace
+### rm () removes objects from your workspace; rm(list = ls()) removes them all.
+rm(list=ls()) # remove all the objects in the workspace
+
+### Each object is saved to the disk using the save() function. 
+## They can then be loaded into memory using load().
+load("file.Rda")
+## Saving an object `df`
+save(df, file = "file.Rda")
+## save.image() saves your workspace
+
+### Memory usage
+## memory.size() gives the total amount of memory currently used by R.
+memory.size()
+#[1] 26.1
+## memory.limit() without any argument gives the limit of memory used by R
+## We can increase the limit depending memory of your computer
+memory.limit()
+#[1] 5609
+memory.limit(size=2000) # 2000 stands for 2000 MB
+
+###-------------------------------------------------------------------------------------
+
+###_______SAMPLE SESSION_________
+### Store vectors
+Height <- c(168, 177, 177, 177, 178, 172, 165, 171, 178, 170)
+Height  # print the vector
+#[1] 168 177 177 177 178 172 165 171 178 170
+
+Height[2] # Print the second component
+#[1] 177
+
+Height[2:5] # Print the second, the 3rd, the 4th and 5th component
+#[1] 177 177 177 178
+
+(obs <- 1:10) # Define a vector as a sequence (1 to 10)
+#[1]  1  2  3  4  5  6  7  8  9 10
+
+Weight <- c(88, 72, 85, 52, 71, 69, 61, 61, 51, 75)
+BMI <- Weight/((Height/100)^2)   # Performs a simple calculation 
+BMI
+#[1] 31.17914 22.98190 27.13141 16.59804 22.40879 23.32342 22.40588 20.86112
+#[9] 16.09645 25.95156
+
+### Describe the vector with length(), mean() and var()
+length(Height)
+#[1] 10
+mean(Height) # Compute the sample mean
+#[1] 173.3
+var(Height)
+#[1] 22.23333
+
+### Define a matrix
+ M <- cbind(obs,Height,Weight,BMI) # Create a matrix
+ typeof(M) # Give the type of the matrix
+#[1] "double"
+ class(M)  # Give the class of an object
+#[1] "matrix"
+ is.matrix(M) # Check if   M is a matrix
+#[1] TRUE
+ is.vector(M)  # M is not a vector
+#[1] FALSE
+ dim(M)    # Dimensions of a matrix
+#[1] 10  4
+
+### For example, to create a  matrix
+ matrix(data = NA, nrow = 5, ncol = 5, byrow = T)
+#     [,1] [,2] [,3] [,4] [,5]
+#[1,]   NA   NA   NA   NA   NA
+#[2,]   NA   NA   NA   NA   NA
+#[3,]   NA   NA   NA   NA   NA
+#[4,]   NA   NA   NA   NA   NA
+#[5,]   NA   NA   NA   NA   NA
+
+ matrix(data = 1:15, nrow = 5, ncol = 5, byrow = T)
+#     [,1] [,2] [,3] [,4] [,5]
+#[1,]    1    2    3    4    5
+#[2,]    6    7    8    9   10
+#[3,]   11   12   13   14   15
+#[4,]    1    2    3    4    5
+#[5,]    6    7    8    9   10
+
+## Functions cbind() and rbind() combine vectors into matrices
+ v1 <- 1:5
+ v2 <- 5:1
+ v2
+#[1] 5 4 3 2 1
+ cbind(v1,v2) ## in a column
+#     v1 v2
+#[1,]  1  5
+#[2,]  2  4
+#[3,]  3  3
+#[4,]  4  2
+#[5,]  5  1
+
+ rbind(v1,v2) ## in a row
+#   [,1] [,2] [,3] [,4] [,5]
+#v1    1    2    3    4    5
+#v2    5    4    3    2    1
+
+## The dimension of a matrix can be obtained using the dim() function.
+ X<-matrix(data = 1:15, nrow = 5, ncol = 5, byrow = T)
+ dim(X)
+#[1] 5 5
+ nrow(X) ## number of rows
+[1] 5
+ ncol(X) ## number of columns
+[1] 5
+
+## Unlike data frames matrices must either be numeric or character in type
+ a=matrix(2,2,2)
+ a
+#     [,1] [,2]
+#[1,]    2    2
+#[2,]    2    2
+ a = rbind(a,c("A","A"))
+ a
+#     [,1] [,2]
+#[1,] "2"  "2" 
+#[2,] "2"  "2" 
+#[3,] "A"  "A"
+
+### Arrays
+## Composed of n dimensions. Each dimension is a vector of objects of the same type
+## An array of one dimension of one element is constructed as
+## The array x created is single dimension (dim=c(1)) drawn from the vector with values c(T,F).
+> x = array(c(T,F),dim=c(1))
+x
+#[1] TRUE
+
+## A similar array, y, was created with a single dimension and two values.
+ y = array(c(T,F),dim=c(2))
+ y
+#[1]  TRUE FALSE
+
+## A three dimensional array - 3 by 3 by 3 
+ z = array(1:27,dim=c(3,3,3))
+ dim(z)
+#[1] 3 3 3
+z
+#, , 1
+#
+#[,1] [,2] [,3]
+#[1,]    1    4    7
+#[2,]    2    5    8
+#[3,]    3    6    9
+#
+#, , 2
+#
+#[,1] [,2] [,3]
+#[1,]   10   13   16
+#[2,]   11   14   17
+#[3,]   12   15   18
+#
+#, , 3
+#
+#[,1] [,2] [,3]
+#[1,]   19   22   25
+#[2,]   20   23   26
+#[3,]   21   24   27
+
+## Accessing the 3 by 3 by 3 array
+## The third dimension is a 3 by 3 array.
+ z[,,3]
+#[     ,1] [,2] [,3]
+#[1,]   19   22   25
+#[2,]   20   23   26
+#[3,]   21   24   27
+
+### Plot the data using plot()
+plot(Height,Weight,ylab="Weight",xlab="Height",main="Corpulence")
+
+### Define a data frame
+ mydat <- data.frame(M) # Creates a dataframe
+ names(mydat) # Give the names of each variable
+#[1] "obs"    "Height" "Weight" "BMI"   
+ str(mydat)   # give the structure of your data
+#'data.frame':   10 obs. of  4 variables:
+#$ obs   : num  1 2 3 4 5 6 7 8 9 10
+#$ Height: num  168 177 177 177 178 172 165 171 178 170
+#$ Weight: num  88 72 85 52 71 69 61 61 51 75
+#$ BMI   : num  31.2 23 27.1 16.6 22.4 ...
+#
+ View(mydat)  # Look at your data
+# 
+ summary(mydat)  # Descriptive Statistics
+#obs            Height          Weight           BMI       
+#Min.   : 1.00   Min.   :165.0   Min.   :51.00   Min.   :16.10  
+#1st Qu.: 3.25   1st Qu.:170.2   1st Qu.:61.00   1st Qu.:21.25  
+#Median : 5.50   Median :174.5   Median :70.00   Median :22.70  
+#Mean   : 5.50   Mean   :173.3   Mean   :68.50   Mean   :22.89  
+#3rd Qu.: 7.75   3rd Qu.:177.0   3rd Qu.:74.25   3rd Qu.:25.29  
+#Max.   :10.00   Max.   :178.0   Max.   :88.00   Max.   :31.18  
+
+### Save an R session (all the objects in memory) and load the session
+ save.image(file="~/Documents/R/test.rda")
+ load("~/Documents/R/test.rda")
+ dir() ## lists content working directory
+
+###--------------------------------------------------------------
+
+###________SUBSETTING_________
+
+## Subsetting Lists
+x<- list(foo=1:4,bar=0.6)
+x[1]
+#$foo
+#1234
+
+x[[1]]
+#1 2 3 4
+
+x$bar
+#0.6
+x[["bar"]]
+#0.6
+x["bar"]
+#0.6
+
+## Subsetting Multiple elements of a list
+x <- list(foo=1:4, bar=0.6,baz="hello")
+x[c(1,3)]
+#$foo
+#[1] 1 2 3 4
+#$baz
+#[1] "hello"
+
+## Subsetting list with [[ ]]
+# We can use just with computed indices
+# $ use with literal names
+x <- list(foo=1:4,bar=0.6,baz="hello")
+# [1] 1 2 3 4
+
+x$name  ## element "name" doesn't exist
+$NULL
+x$foo
+# [1] 1 2 3 4  # element "foo" does exist
+
+## Subsetting Nested elements of a list
+#[[ ]] can take an integer sequence
+
+x <- list(a=list(10,12,14),b=c(3.14,2.81))
+x[[c(1,3)]]
+# [1] 14   ## same result with
+x[[1]][[3]]
+# [1] 14
+
+x[[c(2,1)]]
+# [1] 3.14
+
+## Partial matching
+## Of names with [] and $
+
+x <- list(aardvark=1.5)
+x$a
+# [1] 1.5
+
+x <-[["a"]]   ##NULL
+x[["a",exact=FALSE]]
+# [1] 1.5
+
+## Subsetting Missing Values is.na(x)
+## Common task is to remove missing values (NAS)
+x<- c(1,2,NA,4,NA,5)
+bad <- is.na(x) ## I want !NAS
+x[!bad]
+# [1] 1 2 4 5
+
+## Now I want to take a subset with no missing values
+x <- c(1,2,NA,4,NA,5)
+y <- c("a","b",NA,"d",NA,"f")
+good <- complete.cases(x,y)
+good
+# [1]  TRUE  TRUE FALSE  TRUE FALSE  TRUE
+x[good]
+# [1] 1 2 4 5
+y[good]
+# [1] "a" "b" "d" "f"
+
+## Now for example
+## create a vector with 1000 draws from a standard normal distribution
+x <- rnorm(1000)
+## create a vector with 1000 NAs
+z <- rep(NA,1000)
+## Now, take a sample of 100 elements at random from these 2000
+myData <- sample(c(x,z),100)
+## QUESTION: Where our NAs are located in our data?
+myNA <- is.na(myData); myNa  ## or with
+myData==NA  ## or with ; is.na(myData)
+## Counting NA
+sum(myNA) ##and finally ; (myData)
+
+## Now, removing NA values from data frames
+airquality[1:6,  ]
+good <- complete.cases(airquality)
+airquality[good, ][1:6, ]  ## with !NA
+
+##------------------------------------------------------------
+  
+###__________READING LARGER DATASETS- read.table()
+# Makes R run faster
+initial <- read.table("datable.txt",nrows=100)
+classes <- sapply(initial, class)
+tabAll <- read.table("datatable.txt",colClasses=classes)
+
+##------------------------------------------------------------
+
+###______________CONTROL STRUCTURES__________
+### Control structures like: IF, WHILE, ALLOW allow control the flow of R program
+### Using IF (conditional)
+if(TRUE) {
+  print("This is true")
+}
+else {
+  print(This is false")
+}
+# [1] "This is false"
+
+## This is a valid if/else structure.
+if(x > 3) {
+        y <- 10
+} else {
+        y <- 0
+}
+
+## So is this one.
+y <- if(x > 3) {
+        10
+} else { 
+        0
+}
+
+## Of course, the else clause is not necessary.
+if(<condition1>) {
+
+}
+
+if(<condition2>) {
+
+}
+
+x <- 2  # x gets the value 2
+if(x==3){
+    print("This is true")
+   }
+   else {
+     print("This is false")
+}
+#[1] "This is false"
+
+ if(x==2 && y>2){
+     print("x equals 2 and y is greater than 2")
+     }
+#[1] "x equals 2 and y is greater than 2"
+
+### Using LOOPS
+### loops with FOR
+
+for (i in 1:10) {
+   print(i)
+}
+#[1] 1
+#[1] 2
+#[1] 3
+#[1] 4
+#[1] 5
+#[1] 6
+#[1] 7
+#[1] 8
+#[1] 9
+#[1] 10
+
+x <- c("a", "b", "c", "d")
+for(i in 1:4) {  
+  print(x[i])
+}
+#[1] "a"
+#[1] "b"
+#[1] "c"
+#[1] "d"
+
+for(i in seq_along(x)) {
+  print(x[i])
+}
+#[1] "a"
+#[1] "b"
+#[1] "c"
+#[1] "d"
+
+for(letter in x) {
+  print(letter)
+}
+#[1] "a"
+#[1] "b"
+#[1] "c"
+#[1] "d
+
+for(i in 1:4) 
+  print(x[i])
+#[1] "a"
+#[1] "b"
+#[1] "c"
+#[1] "d
+
+### Nested FOR loops
+
+x <- matrix(1:6, 2, 3)
+x
+for(i in seq_len(nrow(x))) {
+  for(j in seq_len(ncol(x))) {
+    print(x[i, j])
+  }
+}
+#[1] 1
+#[1] 3
+#[1] 5
+#[1] 2
+#[1] 4
+#[1] 6
+
+### While loops
+## Begin testing a condition, if is true. then execute the loop body. 
+## Once loop is executed. Condition is tested again, and so forth
+
+#[1] 0
+#[1] 1
+#[1] 2
+#[1] 3
+#[1] 5
+#[1] 6
+#[1] 7
+#[1] 8
+#[1] 9
+ 
+## With while, sometimes there are multiple conditions
+z <- 5
+while(z >= 3 && z <= 10) {
+  print(z)
+  coin <-rbinom(1, 1, 0.5)
+  if(coin == 1) {  ## random walk
+  z <- z +1
+  }else{
+    z <- z-1
+  }
+}
+#[1] 5
+#[1] 6
+#[1] 5
+#[1] 4
+#[1] 5
+#[1] 6
+#[1] 7
+#[1] 6
+#[1] 5
+#[1] 4
+#[1] 5
+#[1] 4
+#[1] 5
+#[1] 4
+#[1] 5
+#[1] 6
+#[1] 5
+#[1] 4
+#[1] 5
+#[1] 4
+#[1] 3
+
+### NEXT in loops
+for(i in 1:1000) {
+  if(i <= 20) {
+    ##Skip the first 20 iterations
+    next
+  }
+  ## Do something here
+  }
+
+##------------------------------------------------------------
+
+###______vECTORIZATION (implicit loops)__________
+### apply() apply a function over the margins of an array
+### lapply() Loop over a list and evaluate a function on each element
+### sapply() Same as lapply() but try to simplify the resul
+### tapply() Apply a function over subsets of a vector
+### mapply() multivariate version of lapply()
+N <- 10
+x1 <- rnorm(N)
+x2 <- rnorm(N) + x1 + 1
+male <- rbinom(N,1,.48)
+y <- 1 + xi + x2 + male + rnorm(N)
+myData <- data.frame(y,x1,x2,male)
+lapply(myData,mean) #returns a list
+#$y
+#[1] 4
+#$x1
+#[1] 0.2770778
+#$x2
+#[1] 1.018787
+#$male
+#[1] 0.3
+
+sapply(myData,mean) #returns a vector
+#y        x1        x2      male 
+#4.0000000 0.2770778 1.0187873 0.3000000 
+
+apply(myData,1,mean) # applies the function to each row
+#[1]  1.1171547  0.8343634 -0.3248893  1.6203620  1.4766708  2.1996836
+#[7]  2.2057034  2.0249858  1.2975479  1.5380803
+apply(myData,2,mean) # applies the function to each column
+#4.0000000 0.2770778 1.0187873 0.3000000 
+
+tapply(myData$y,myData$male,mean) #apllies the function to each level of a factor
+#    0     1 
+#1.040 5.454
+
+### lapply() always will return a list
+x <- list(a = 1:5,b = rnorm(10))
+lapply(x,mean)
+# [1] 3
+#
+#$b
+#[1] 0.1570857
+
+x <- list(a = 1:4,b = rnorm(10), c = rnorm(20,1), d=rnorm(100,5))
+lapply(x,mean)
+#$a
+#[1] 2.5
+#
+#$b
+#$[1] 0.140962
+#
+#$c
+#[1] 0.8963297
+#
+#$d
+#[1] 5.153206
+
+x <- 1:4
+lapply(x,runif, min = 0, max = 5)
+#[[1]]
+#[1] 2.090001
+#
+#[[2]]
+#[1] 2.582228 4.109156
+#
+#[[3]]
+#[1] 3.521435 2.639731 1.516384
+#
+#[[4]]
+#[1] 0.5536162 4.6146353 2.1220014 4.9074133
+
+### saplly() will try to simplify the result of lapply() if possible
+x <- list(a = 1:4,b = rnorm(10), c = rnorm(20,1), d=rnorm(100,5))
+sapply(x,mean)
+#        a         b         c         d 
+#2.5000000 0.2157379 0.7183672 5.0590031
+
+### apply() is most often use to apply a function to rows or columns of a matrix
+### it can be used with general arrays
+x <- matrix(rnorm(200),20,10)
+apply(x,2,mean)
+#[1] -0.36878457  0.14632712  0.29989357 -0.03243227 -0.34132280  0.09424873
+#[7]  0.41093092 -0.02263104 -0.20314875  0.33647587
+
+apply(x,1,sum)
+#[1]  -0.162338828  2.873914227 -1.998521116 -0.675386191  6.149962253
+#[6]   1.764600237  1.914994782 -0.243225568  1.323827626 -2.008820033
+#[11] -0.297638953  5.245163684  1.387333135 -1.563486948 -4.286454776
+#[16]  0.890275692 -1.324523170  0.009703546  0.853276663 -3.461520357
+
+### apply() col/wow sums and means
+## rowSums  = apply(x,1,sum)
+## rowMeans = apply(x,1,mean)
+## colSums  = apply(x,2,sum)
+## colMeans = apply(x,2,mean)
+
+### Apply() other ways. 
+### Quantiles of rows of a matrix
+x <- matrix(rnorm(200),20,10)
+apply(x,1,quantile,probs = c(0.25,0.75))
+#          [,1]       [,2]       [,3]        [,4]       [,5]      [,6]
+#25% -1.1382083 -0.7154221 -0.3450960 -0.93566369 -0.1546529 0.1450603
+#75%  0.8532476  0.2737537  0.8920855  0.06372081  1.5154800 0.7822728
+#          [,7]       [,8]       [,9]      [,10]      [,11]      [,12]
+#25% -0.7015191 -0.4276700 -0.3998783 -0.9788060 -0.1306109 -0.5242083
+#75%  0.7835900  0.9008524  0.6311825 -0.6679648  1.2437027  0.8375514
+#         [,13]      [,14]      [,15]      [,16]      [,17]      [,18]
+#25% -0.2704254 0.03811542 -0.3599430 -0.4430957 -0.3879781 -0.7469107
+#75%  0.8724733 0.59088888  0.4159396  0.3341540  0.7705576  0.2148826
+         #[,19]      [,20]
+#25% -0.2671408 -0.4518031
+#75%  0.6407976  0.3521868
+
+### Average matrix in an array
+a <- array(rnorm(2 * 2 * 10), c(2,2,10))
+apply(a,c(1,2),mean)
+#           [,1]         [,2]
+#[1,]  0.6369863 -0.008836067
+#[2,] -0.1583577  0.679116073
+rowMeans(a,dims = 2)
+#           [,1]         [,2]
+#[1,]  0.6369863 -0.008836067
+#[2,] -0.1583577  0.679116073
+
+###tapply() is used to apply a function over subsets of a vector
+x <- c(rnorm(10),runif(10),rnorm(10,1))
+f <- gl(3,10)
+f
+#[1] 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3
+#Levels: 1 2 3
+tapply(x,f,mean)
+#         1          2          3 
+#-0.2159529  0.5633908  0.6797613 
+
+### tapply() Take group means without simplification
+tapply(x,f,mean,simplify = FALSE)
+#$`1`
+#[1] -0.2159529
+#
+#$`2`
+#[1] 0.5633908
+#
+#$`3`
+#[1] 0.6797613
+
+### tapply() find group ranges
+tapply(x,f,range)
+#$`1`
+#[1] -1.813917  1.367771
+#
+#$`2`
+#[1] 0.09509871 0.92299818
+#
+#$`3`
+#[1] -0.8293094  1.7328687
+
+### mapply multivariable apply of sorts
+## the following is tedious to type
+list(rep(1,4),rep(2,3),rep(3,2),rep(3,1))
+## instead we can do
+mapply(rep,1:4,4:1)
+#[[1]]
+#[1] 1 1 1 1
+#
+#[[2]]
+#[1] 2 2 2
+#
+#[[3]]
+#[1] 3 3
+#
+#[[4]]
+#[1] 4
+
+### mapply() Instant vectorization
+noise <- function(n,mean,sd) {
+  rnorm(n,mean,sd)
+}
+noise(5,1,2)
+}
+noise(5,1,2)
+[1]  2.8199031  1.4544538 -1.1531074  0.8360228  4.0756294
+
+noise(1:5,1:5,2)
+[1] 3.517232 3.878232 3.911837 3.688214 9.424089
+## Instant vectorizacion with mapply()
+mapply(noise, 1:5,1:5,2)
+#[[1]]
+#[1] 0.6724438
+#
+#[[2]]
+#[1] 2.674333 5.004172
+#
+#[[3]]
+#[1] -0.5019022  0.2058145  3.6292665
+#
+#[[4]]
+#[1]  5.395888  2.151710  3.524492 -1.551377
+#
+#[[5]]
+#[1] 5.437492 4.195407 9.070071 5.043088 3.974678
+
+## Which is the same instant vectorization as
+list(noise(1,1,2),noise(2,2,2),
+     noise(3,3,2),noise(4,4,2),
+     noise(5,5,2))
+
+### split() takes a vector or other objects and splits it into groups
+## determined by a factor or list of factors
+x <- c(rnorm(10), runif(10),rnorm(10,11))
+f <- gl(3,10)
+split(x,f)
+#$`1`
+#[1]  1.09966243 -0.86458790 -0.46436673  0.74972632 -0.02083017  0.41624768
+#[7] -2.62977136 -1.66529941 -0.71587141 -0.19667895
+#
+#$`2`
+#[1] 0.5182775 0.4610488 0.8149972 0.0552355 0.9279215 0.4860266 0.5653717
+#[8] 0.5515969 0.5982286 0.4903615
+#
+#$`3`
+#[1]  9.665972 12.863321 12.517250 12.399225 12.667451 11.899372 11.886343
+#[8]  9.794893 12.107294  9.761322
+
+## A common idiom is split() followed by an lapply()
+lapply(split(x,f),mean)
+#$`1`
+#[1] -0.429177
+#
+#$`2`
+#[1] 0.5469066
+#
+#$`3`
+#[1] 11.55624
+
+## Splitting a data frame
+library(datasets)
+head(airquality)
+#Ozone Solar.R Wind Temp Month Day
+#1    41     190  7.4   67     5   1
+#2    36     118  8.0   72     5   2
+#3    12     149 12.6   74     5   3
+#4    18     313 11.5   62     5   4
+#5    NA      NA 14.3   56     5   5
+#6    28      NA 14.9   66     5   6
+ s <- split(airquality,airquality$Month)
+lapply(s, function(x) colMeans(x[,c("Ozone","Solar.R","Wind")]))
+#$`5`
+#  Ozone  Solar.R     Wind 
+#     NA       NA 11.62258 
+#
+#$`6`
+#  Ozone   Solar.R      Wind 
+#     NA 190.16667  10.26667 
+#
+#$`7`
+#  Ozone    Solar.R       Wind 
+#     NA 216.483871   8.941935 
+#
+#$`8`
+#  Ozone  Solar.R     Wind 
+#     NA       NA 8.793548 
+#
+#$`9`
+#  Ozone  Solar.R     Wind 
+#     NA 167.4333  10.1800 
+
+### Splitting a data frame
+sapply(s,function(x)colMeans(x[,c("Ozone","Solar.R","Wind")]))
+#               5         6          7        8        9
+#Ozone         NA        NA         NA       NA       NA
+#Solar.R       NA 190.16667 216.483871       NA 167.4333
+#Wind    11.62258  10.26667   8.941935 8.793548  10.1800
+
+sapply(s,function(x)colMeans(x[,c("Ozone","Solar.R","Wind")],
+                             na.rm = TRUE))
+#Ozone    23.61538  29.44444  59.115385  59.961538  31.44828
+#Solar.R 181.29630 190.16667 216.483871 171.857143 167.43333
+#Wind     11.62258  10.26667   8.941935   8.793548  10.18000
+
+### Splitting on more than one level
+x <- rnorm(10)
+f1 <- gl(2,5)
+f2 <- gl(5,2)
+f1
+#[1] 1 1 1 1 1 2 2 2 2 2
+#Levels: 1 2
+f2
+#[1] 1 1 2 2 3 3 4 4 5 5
+#Levels: 1 2 3 4 5
+interaction(f1,f2)
+#[1] 1.1 1.1 1.2 1.2 1.3 2.3 2.4 2.4 2.5 2.5
+#Levels: 1.1 2.1 1.2 2.2 1.3 2.3 1.4 2.4 1.5 2.5
+
+## Interaction can create empty levels
+str(split(x,list(f1,f2)))
+#List of 10
+#$ 1.1: num [1:2] 1.104 0.769
+#$ 2.1: num(0) 
+#$ 1.2: num [1:2] -0.649 0.469
+#$ 2.2: num(0) 
+#$ 1.3: num -0.246
+#$ 2.3: num 0.766
+#$ 1.4: num(0) 
+#$ 2.4: num [1:2] 1.3 -0.453
+#$ 1.5: num(0) 
+#$ 2.5: num [1:2] -0.194 0.104
+
+## empty levels can be dropped
+str(split(x,list(f1,f2),drop=TRUE))
+#$ 1.1: num [1:2] 1.104 0.769
+#$ 1.2: num [1:2] -0.649 0.469
+#$ 1.3: num -0.246
+#$ 2.3: num 0.766
+#$ 2.4: num [1:2] 1.3 -0.453
+#$ 2.5: num [1:2] -0.194 0.104
+
+###---------------------------------------------------------------------
+
+###__________DEBUGGING TOOLS______________
+## traceback: prints out the function cal stack. does nothing if no error
+## debug: flags a function
+## browser: suspends the execution of a function and puts in debug mode
+## trace: allows to insert debugging code into a function
+## recoves: allows to modify the error
+
+## Tracing errors with traceback()
+## Example the following function whose sole purpose is to throw an error.
+myFun <- function () {
+  stop("Woops! an error")
+}
+
+## A call to myFun() gives
+myFun()
+#Error in myFun() : Woops! an error
+
+## Calling myFun2() and traceback() gives
+ myFun2()
+#Error in myFun() : Woops! An error
+ traceback()
+#3: stop("Woops! An error")
+#2: myFun()
+#1: myFun2()
+
+## Another example
+ mean(m)
+# Error in mean(m) : object 'm' not found
+traceback()
+# 1: mean(m)
+
+### debug. A function can be executed by setting it to debugging mode with
+debug(FUNCTION_NAME)
+## Then, when the function is called, and a browser in that function's environment is opened 
+## so that it can be executed line by line. In the debugging browser
+## apart from all standard R functionality, the following commands are available.
+## n: Advance to next step. An empty line also works.
+## c, cont: Continue to the end of the current context.
+## where: Print the stack of function calls (where are you?
+## Q: Exit the browser and return to the top-level R prompt
+## Debugging switched off with
+undebug(FUNCTION_NAME)
+
+### Browsing the call 
+## The most advanced debugging in R base
+## By setting options(error=recover) you browse any environment in the call stack
+## For example
+ options(error=recover)
+ myFun2()
+#Error in myFun() : Woops! An error
+#
+#Enter a frame number, or 0 to exit   
+#
+#1: myFun2()
+#2: myFun()
+#
+#Selection:
+## By typing '1' or '2' behind Selection:the browser will jump to the selected environment
+## Once in the browser, all standard R functionality is at your disposal, 
+## as well as the commands in the table below.
+  ## n: Advance to next step. An empty line also works.
+  ## c, cont: Continue to the end of the current context.
+  ## where: Print the stack of function calls (where are you?
+  ## Q: Exit the browser and return to the top-level R prompt
+## Recovery mode can be switched off by
+options(error=NULL)
+
+###---------------------------------------------------------------------
+
+###__________SIMULATION______________
+### rnorm: generate random Normal variates with a given mean and sd
+##  rnorm(n, mean = 0, sd = 1)
+### pnorm: evaluate the cumulative distribution function for a Normal distribution
+##  pnorm(q,mean = 0,sd = 1,lower.tail = TRUE, log.p = FALSE)
+### dnorm: evaluate the Normal probability density at a point or vector of points
+##  dnorm(x,mean = 0, sd = 1. log = FALSE)
+### rpois: generate random Poisson variates with a given rate
+
+### Generating random numbers
+x <- rnorm(10)
+x
+#[1]  1.39428733 -0.34308042  0.12116540  0.09302132 -1.20947813 -0.15097663
+#[7] -0.09176090  1.16338136 -2.33987778  2.47667709
+
+set.seed(1)
+x <- rnorm(10,20,2)
+x
+#[1] 24.64946 18.64844 23.55926 23.32695 21.61096 19.51958 19.31132 19.43904
+#[9] 16.40549 20.99029
+summary(x)
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#16.41   19.34   20.25   20.75   22.90   24.65 
+
+### Generating Poisson data
+rpois (10, 1)
+#[1] 2 1 1 0 3 1 0 0 0 1
+rpois(10,2)
+#[1] 0 1 3 3 0 0 1 1 1 5
+rpois(10,20)
+#[1] 23 17 16 20 16 17 14 21 23 24
+
+ppois(2,2) ##cumulative distribution
+#[1] 0.6766764 ##Pr(x <=2)
+ppois(4,2)
+#[1] 0.947347  ##Pr(x <= 4)
+ppois(6,2)
+#[1] 0.9954662  ##Pr(x <= 6)
+
+### Generating random numbers from linear model
+set.seed(20)
+x <- rnorm(100)
+e <- rnorm(100,0,2)
+y <- 0.5 + 2 * x + e
+summary(y)
+#    Min. 1st Qu.  Median    Mean  3rd Qu.    Max. 
+#-6.4080 -1.5400   0.6789  0.6893  2.9300  6.5050
+plot(x,y)
+
+### Generating random numbers from linear model
+## x is binary
+set.seed(10)
+x <- rbinom(100,1,0.5)
+e <- rnorm(100,0,2)
+y <- 0.5 +2 *x + e
+summary(y)
+#    Min. 1st Qu. Median    Mean  3rd Qu.    Max. 
+#-3.4940 -0.1409  1.5770  1.4320  2.8400  6.9410 
+plot(x,y)
+
+
+### Generating random numbers from a generalized linear model
+## Simulating a Poisson model
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#0.00    1.00    1.00    1.55    2.00    6.00 
+plot(x,y)
+
+### Random sampling from arbitrary distributions
+set.seed(1)
+sample(1:10,4)
+#[1] 7 1 4 8
+sample(letters,5)
+#[1] "j" "y" "e" "s" "b"
+sample(1:10)   ##permutation
+#[1]  5  2  9  6 10  8  7  1  3  4
+sample(1:10)
+#[1]  7  6  3  8  9  5  4 10  2  1
+sample(1:10,replace = TRUE)  ## sample w/replacement
+#[1]  8 10  3  4  9  1  4  5  2  6
+
+###----------------------------------------------------------------------------------
+
+###______________________TIMES AND DATES____________________________
+
+### The default format is yyyy-mm-dd hh:mm:ss or %Y-%m-%d %H:%M:%S
+### For example 2014-07-12 23:12:24
+
+### System date and time
+Sys.time()
+#[1] "2014-07-12 15:41:09 EDT"
+ format(Sys.time(),"%H %M")   # in a different format and without the date
+#[1] "15 41"
+ Sys.Date()
+#[1] "2014-07-12"
+ date()                       # returns the current date and time,
+#[1] "Sat Jul 12 15:42:46 2014"
+
+### Convert strings to date/time objects
+myDate <- as.Date("2014-07-12")
+myDate
+#[1] "2014-07-12"
+
+## input date in a different format
+myDate2 <- as.Date("2014/07/12", format="%m/%d/%y") 
+myDate2
+## input time in a different format
+myTime <- strptime("14/07/12 14.34.35", format="%m/%d/%y %H.%M.%S")
+myTime
+## convert a date/time object to a normal string
+myString <- as.character(Sys.time())
+myString
+
+### Extracting information from dates
+## Get a string representing the weekday of the specified date
+ weekdays(myDate)
+#[1] "Saturday"
+ months(my.date)
+#[1] "July"
+myDate
+#[1] "2014-07-12"
+## the integer number of days since the beginning of epoch
+julian(my.date)
+#[1] 16263
+#attr(,"origin")
+#[1] "1970-01-01"
+
+### Dates in R
+### Dates are represented by the Date class
+### Can be coerced from a character string using the as.Date() function.
+x <- as.Date("1970-01-01")
+x
+#[1] "1970-01-01"
+
+### Times in R
+## Times are represented using the POSIXct or the POSIXlt class
+## Can be coerced from a character string using as.POSIXlt or as.POSIXct function.
+x <- Sys.time()
+x
+#[1] "2014-07-12 21:55:29 EDT"
+p <- as.POSIXlt(x)
+names(unclass(p))
+#[1] "sec"    "min"    "hour"   "mday"   "mon"    "year"   "wday"   "yday"   "isdst" 
+#[10] "zone"   "gmtoff"
+p$sec
+#[1] 29.34113
+
+## You can also use the POSIXct format.
+x <- Sys.time()
+x    ## Already in 'POSIXct' format
+#[1] "2014-07-12 22:04:17 EDT"
+unclass(x)
+#[1] 1405217057
+#Error: $ operator is invalid for atomic vectors
+p <- as.POSIXlt(x)
+p$sec
+#[1] 17.18532
+
+### There is strptime function function in case dates are written in different format
+ datestring <- c("January 10, 2012 10:40")
+ x <- strptime(datestring, "%B %d, %Y %H:%M")
+ x
+#[1] "2012-01-10 10:40:00 EST"
+class(x)
+#[1] "POSIXlt" "POSIXt" 
+
+### Operations on Dates and Times
+##You can use mathematical operations on dates and times
+x <- as.Date("2012-01-01")
+y <- strptime("9 Jan 2011 11:34:21", "%d %b %Y %H:%M:%S") 
+x <- as.POSIXlt(x) 
+x-y
+#Time difference of 356.3095 days
+
+## Even keeps track of leap years, leap seconds, daylight savings, and time zones.
+x <- as.Date("2012-03-01") ; y <- as.Date("2012-02-28") 
+x-y
+#Time difference of 2 days
+
+x <- as.POSIXct("2012-10-25 01:00:00")
+y <- as.POSIXct("2012-10-25 06:00:00", tz = "GMT") 
+y-x
+#Time difference of 1 hours

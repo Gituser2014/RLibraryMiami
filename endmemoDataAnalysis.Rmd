@@ -1,0 +1,238 @@
+---
+title: "Endmemo Statistical Analysis"
+author: "Juanjo Moreiras"
+date: "Monday, July 28, 2014"
+output: html_document
+---
+
+###--------------------- R "aov" function--------------
+
+## aov() function is for analysis of variance (ANOVA).
+
+aov(formula, data=NULL, ...)
+
+formula: a formula specifying the model
+data: the data frame containing the variables specified in the formula
+
+```{r}
+## Let first read in the data from the file:
+x <- read.csv("anova.csv",header=T,sep="\t")
+
+## One way ANOVA analysis:
+a = aov(Expression~Subtype, data=x)
+> summary(a)
+             Df Sum Sq Mean Sq F value Pr(>F)  
+Subtype       2   4.75  2.3769   3.991 0.0196 *
+Residuals   278 165.59  0.5956                 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Please pay attention to the formula format, dependant variance "Expression" is in front of the independant variance "Subtype". 
+
+## Report the means and the number of subjects:
+print(model.tables(a,"means"),digits=2)
+Tables of means
+Grand mean
+-0.3053381 
+
+ Subtype 
+         A     B     C
+     -0.18 -0.39 -0.49
+rep 143.00 75.00 63.00
+
+##Two way ANOVA analysis:
+a = aov(Expression~Subtype*Age, data=x)
+> summary(a)
+             Df Sum Sq Mean Sq F value Pr(>F)  
+Subtype       2   4.75   2.377   3.975 0.0199 *
+Age           1   0.09   0.095   0.159 0.6905  
+Subtype:Age   2   1.04   0.518   0.866 0.4217  
+Residuals   275 164.46   0.598                 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Here, dependant variance is "Expression", "Subtype" and "Age" are independant variances. 
+
+## Report the means and the number of subjects:
+>print(model.tables(a,"means"),digits=2)
+Tables of means
+Grand mean
+-0.3053381 
+
+ Gender 
+         f      m
+     -0.39  -0.22
+rep 135.00 146.00
+
+ Subtype 
+         A     B     C
+     -0.22 -0.36 -0.44
+rep 143.00 75.00 63.00
+
+ Gender:Subtype 
+      Subtype
+Gender A   B   C  
+   f     0   0  -1
+   rep  40  49  46
+   m     0  -1   0
+   rep 103  26  17
+```
+
+###-------------- Chi Square Test ---------------
+
+## chisq.test() function performs chi squared contingency table tests and goodness of fit tests.
+
+## chisq.test(x, y = NULL, correct = TRUE, p = rep(1/length(x), length(x)), rescale.p = FALSE, simulate.p.value = FALSE, B = 2000) 
+
+. x: a numeric vector or matrix.
+. y: a numeric vector or a factor (if x is a factor of same length) or NULL (if x is a matrix).
+. correct: a logical indicating whether to apply continuity correction when computing the test statistic for 2 by 2 tables: one half is subtracted from all |O - E| differences. No correction is done if simulate.p.value = TRUE. 
+. p: a vector of probabilities of the same length of x. An error is given if any entry of p is negative. 
+. rescale.p: a logical scalar; if TRUE then p is rescaled (if necessary) to sum to 1. If rescale.p is FALSE, and p does not sum to 1, an error is given. 
+. simulate.p.value: a logical indicating whether to compute p-values by Monte Carlo simulation. 
+. B: an integer specifying the number of replicates used in the Monte Carlo test. 
+
+
+## For Example, there are 205 mutations in gene p53 of 514 tumors, while 96 stage IV tumors have 86 mutations. We expect that 96 stage IV tumors should have 96 x 205 / 514 = 38 mutations, while we observed 86. Is that significantly different from the general mutation pattern?
+
+The R source code for a chi square goodness of fit test is:
+
+```{r}
+sam <- matrix(c(86,96,38,96),nrow=2,ncol=2); sam
+     [,1] [,2]
+[1,]   86   38
+[2,]   96   96
+
+chisq.test(sam)
+  Pearson's Chi-squared test with Yates' continuity correction
+data:  sam
+X-squared = 10.7773, df = 1, p-value = 0.001028
+
+chisq.test(sam)$p.value
+[1] 0.001027552
+```
+###---------------------Clustering Tree Plot----------------
+
+```{r}
+## Let's first have a look of our data file named clustering.csv:
+elements  S1	S2	S3	S4	S5	S6	S7	S8
+R1	-0.0027	0.1057	0.1976	0.0209	0	0.0089	0.0082	0.0209
+R2	0	-0.1204	0.2627	0	0	0.283	0.2076	-0.0158
+R3	0	-0.1204	0.2627	0	0	0.283	0.2076	-0.0158
+R4	0.0142	0	-0.454	0.0101	-0.0213	-0.0084	-0.0121	0.0083
+R5	0	0	-0.2334	0.007	0.4151	0	0.0987	0.021
+R6	0.0381	0.0644	0.2302	0	0	-0.0476	0.2432	-0.0069
+R7	0.0381	0.0644	0.2302	0	0	-0.0476	0.2432	-0.0069
+R8	0.0381	0.0644	0.2302	0	0	-0.0476	0.2432	-0.0069
+R9	0.0891	-0.1022	-0.4466	-0.4877	-0.0175	-0.0523	-0.4792	-0.0547
+R10	0.0046	-0.1539	-0.4645	0	-0.0282	0	-0.0217	0.017
+R11	0.0706	0.028	0.3626	0	0.0196	-0.0094	0.3086	0
+R12	0.0311	0.0759	0.2119	0	-0.0022	0	0	0.0117
+R13	0.0013	0.0702	-0.3176	0.0152	0.0095	-0.0224	0.2069	0.005
+R14	0.0491	0.0525	-0.4329	0.0237	-0.0038	-0.0224	0.2065	0.005
+R15	0.0256	0.0579	0.1846	0.0024	0.0029	-0.0165	0.4781	-0.0123
+R16	-0.0061	-0.1554	-0.0635	0.0121	-0.0282	0	-0.016	0.017
+R17	-0.0061	-0.1554	-0.0635	0.0121	-0.0282	0	-0.016	0.017
+
+## A simple unsupervised hierarchical clustering:
+x <- read.csv("clustering.csv", header=T, dec=".",sep=",")
+data.hclust <- hclust(dist(t(x[,2:ncol(x)])),method="complete")
+plot(data.hclust)
+
+## Let's add some annotations:
+label <- data.hclust$labels
+for (i in 1:length(label)){
+  if (i %% 2 == 1) {label[i]<- paste("control_",label[i],sep="");}
+}
+data.hclust$labels <- label
+plot(data.hclust,pointsize=15,units="px",
+   main="Hierarchical Clustering",xlab="Samples")
+rect.hclust(data.hclust,k=4,border="blue")
+groups<-cutree(data.hclust,k=4)
+```
+
+###----------------Normality Test-------------
+
+## shapiro.test() function performs normality test of a data set with hypothesis that it's normally distributed.
+
+shapiro.test(x)
+
+x: numeric data set
+```{r}
+## Let's generate 100 random number near the range of 0, and to see whether they are normally distributed:
+x <- rnorm(100, mean=0)
+shapiro.test(x)
+   Shapiro-Wilk normality test
+data:  x
+W = 0.9879, p-value = 0.5011
+## Since the p-value is > 0.05, it is accepted the dataset is normally distributed. 
+```
+
+###------------------t test-------------------
+
+## t.test(...) function returns a t test result of two group data sets. 
+t.test(x, y = NULL,
+       alternative = c("two.sided", "less", "greater"),
+       mu = 0, paired = FALSE, var.equal = FALSE,
+       conf.level = 0.95, ...)
+
+x,y:Numeric vectors
+alternative:Alternativ Hypothesis
+mu:True value of the mean
+paired:Paired t-test or not
+
+```{r}
+## Suppose we have two dataset, let's do a t test
+x <- c(1.2,3.4,1.3,-2.1,5.6,2.3,3.2,2.4,2.1,1.8,1.7,2.2)
+y <- c(2.4,5.7,2.0,-3,13,5,6.2,4.8,4.2,3.5,3.7,5.2)
+ret <- t.test(x,y); ret
+##      Welch Two Sample t-test
+data:  x and y 
+t = -1.9667, df = 15.943, p-value = 0.06688
+alternative hypothesis: true difference in means is not equal to 0 
+95 percent confidence interval:
+ -4.7799367  0.1799367 
+sample estimates:
+mean of x mean of y 
+ 2.091667  4.391667 
+```
+
+###--------------wilcoxon rank test------------
+
+## wilcox.test() function performs wilcoxon rank test, which assumes that the means of two unnormally distributed datasets are equal.
+
+wilcox.test(x, ...)
+wilcox.test(x, y, alternative = c("two.sided", "less", "greater"),
+         mu = 0, paired = FALSE, exact = NULL, correct = TRUE,
+         conf.int=FALSE, conf.level = 0.95, ...)
+
+x,y: Unnormally distributed data sets
+ratio: Hypothesized ratio of x/y, default is 1
+alternative: alternative hypothesis, including "two.sided","greater","less"
+conf.level: confidence level
+
+```{r}
+x <- c(1,5,9,24,56,21,3,7,21,4)
+y <- c(12,15,5,9,9,14,56,22,3,7,32,5)
+wilcox.test(x,y)
+       Wilcoxon rank sum test with continuity correction
+
+ data:  x and y
+ W = 51.5, p-value = 0.5966
+ alternative hypothesis: true location shift is not equal to 0
+
+ Warning message:
+ In wilcox.test.default(x, y) : cannot compute exact p-value with ties
+
+## Since the p-value = 0.5966 is much higher than 0.05, the hypothesis that the two means are equal is accepted.
+> y <- c(1233,4356,987,39999,1111,200000)
+> wilcox.test(x,y)
+        Wilcoxon rank sum test with continuity correction
+
+ data:  x and y
+W = 0, p-value = 0.001364
+ alternative hypothesis: true location shift is not equal to 0
+
+Warning message:
+In wilcox.test.default(x, y) : cannot compute exact p-value with ties
+
+p-value = 0.001363 which is much lower than 0.05, rejects the hypothesis.
+

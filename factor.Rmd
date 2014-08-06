@@ -1,0 +1,85 @@
+---
+title: "Factor Variables"
+author: "Juanjo Moreiras"
+date: "Thursday, July 24, 2014"
+output: html_document
+---
+
+## Factor can be numeric or string variables
+
+```{r}
+set.seed(124)
+school <- sample(0:1, 20, replace=T); school   ## school a numeric vector 
+# 0 0 1 0 0 0 1 0 1 0 1 1 1 1 0 0 1 1 1 0
+is.factor(school)
+is.numeric(school)
+```
+
+## Now generate a binary variable school 0=private, 1=public
+
+```{r}
+schoolF <- factor(school, labels =c("private", "public")); schoolF
+# [1] private private public  private private private public  private public  private
+#[11] public  public  public  public  private private public  public  public  private
+#Levels: private public
+is.factor(schoolF)
+```
+
+## Let's generate a string variable named ses
+
+```{r}
+ses <- c ('low','middle','low','low','high')
+#"low"    "middle" "low"    "low"    "high" 
+is.factor(ses)
+is.character(ses)
+```
+
+## Creating a factor with factor()
+## order() can used it instead of factor()
+
+```{r}
+sesF <- factor(ses); sesF
+        #low    middle low    low    high  
+#Levels: high    low                 middle
+is.factor(sesF)
+#TRUE
+
+## By default levels of a factor are orderes according to alphabetical order so in our case
+## "high"=lowest, "low"=middle,"middle"=highest.
+## "levels"" argument fix the order
+sesFactor <- factor(ses, levels= c('low', 'middle', 'high')); is.factor(sesFactor)
+#TRUE
+levels(sesFactor)
+#"low"    "middle" "high"  
+```
+
+## adding a new level "veryHigh" to the factor "sesFactor" of 5 levels
+
+```{r error}
+sesFactor[6] <- 'veryHigh'
+                ## Warning message:
+                   In `[<-.factor`(`*tmp*`, 6, value = "veryHigh") :
+                   invalid factor level, NA generated
+
+ ## To do this correctly, first add the new level "veryHigh", then add an element 
+sesFactor <- factor(sesFactor, levels= c(levels(sesFactor), "veryHigh"))
+sesFactor[6] <- "veryHigh"; sesFactor
+#[1] low      middle   low      low      high     veryHigh
+#Levels: low middle high veryHigh
+```
+
+## Dropping a new level
+
+```{r}
+levels(sesFactor)
+#"low"      "middle"   "high"     "veryHigh"
+
+sesFactorNew <- sesFactor[sesFactor !="veryHigh"]; sesFactorNew
+#[1] low    middle low    low    high  
+#Levels: low middle high veryHigh
+
+sesFactorNew <- factor(sesFactorNew); sesFactorNew
+# [1] low    middle low    low    high  
+#Levels: low middle high
+is.factor(sesFactorNew)
+```

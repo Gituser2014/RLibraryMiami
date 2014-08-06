@@ -1,0 +1,364 @@
+---
+title       : Using data.table
+subtitle    : 
+author      : Jeffrey Leek 
+job         : Johns Hopkins Bloomberg School of Public Health
+logo        : bloomberg_shield.png
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow   # 
+url:
+  lib: ../../librariesNew
+  assets: ../../assets
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+---
+
+```{r setup, cache = F, echo = F, message = F, warning = F, tidy = F}
+# make this an external chunk that can be included in any file
+options(width = 100)
+opts_chunk$set(message = F, error = F, warning = F, comment = NA, fig.align = 'center', dpi = 100, tidy = F, cache.path = '.cache/', fig.path = 'fig/', cache=FALSE)
+
+options(xtable.type = 'html')
+knit_hooks$set(inline = function(x) {
+  if(is.numeric(x)) {
+    round(x, getOption('digits'))
+  } else {
+    paste(as.character(x), collapse = ', ')
+  }
+})
+knit_hooks$set(plot = knitr:::hook_plot_html)
+```
+
+## data.table
+
+* Inherets from data.frame
+  * All functions that accept data.frame work on data.table
+* Written in C so it is much faster
+* Much, much faster at subsetting, group, and updating
+ 
+---
+
+## Create data tables just like data frames
+
+```{r init}
+
+library(data.table)
+DF = data.frame(x=rnorm(9),y=rep(c("a","b","c"),each=3),z=rnorm(9))
+DT = data.table(x=rnorm(9),y=rep(c("a","b","c"),each=3),z=rnorm(9)); DT
+             x y           z
+1:  0.56884686 a  0.12221856
+2:  1.53922467 a  1.94066509
+3:  1.34163075 a -0.89852855
+4: -0.22804722 b  0.04096248
+5: -1.87879805 b  0.72378938
+6: -0.03807838 b  0.40187776
+7: -1.84764149 c -0.55463610
+8: -0.71876726 c -0.33501729
+9:  1.82553854 c -0.05447002
+
+head(DT,3)
+           x y          z
+1 -1.6721944 a -0.4627480
+2  0.2040072 a  0.6223860
+3 -0.3785383 a  0.2554901
+4  0.2736031 b -1.2430462
+5 -1.4866092 b -0.2462717
+6 -1.8493293 b  1.7116482
+7  1.1078240 c  0.1096962
+8 -0.1259785 c  3.2043162
+9  0.6416656 c -0.1443558
+
+```
+
+## See all the data tables in memory
+
+```{r,dependson="init"}
+
+tables()
+     NAME NROW MB COLS  KEY
+[1,] DT      9 1  x,y,z    
+Total: 1MB
+
+```
+
+## Subsetting rows
+
+```{r,Jeff=Getting data}
+
+DT[2,]
+          x y        z
+1: 1.539225 a 1.940665
+
+DT[DF$y=="a",]
+            x y          z
+1: 0.5688469 a  0.1222186
+2: 1.5392247 a  1.9406651
+3: 1.3416307 a -0.8985285
+
+```
+
+## Subsetting rows
+
+```{r,dependson="init"}
+
+DT[c(2,3)]
+          x y          z
+1: 1.539225 a  1.9406651
+2: 1.341631 a -0.8985285
+
+```
+
+## Subsetting columns!?
+
+```{r,dependson="init"}
+
+DT[,c(2,3)]
+  y          z
+          x y          z
+1: 1.539225 a  1.9406651
+2: 1.341631 a -0.8985285
+> DT[,c(2,3)]
+[1] 2 3
+
+```
+
+## Column subsetting in data.table
+
+* The subsetting function is modified for data.table
+* The argument you pass after the comma is called an "expression"
+* In R an expression is a collection of statements enclosed in curley brackets 
+
+```{r }
+
+{
+  x = 1
+  y = 2
+}
+k = {print(10); 5}
+[1] 10
+print(k)
+[1] 5
+
+```
+
+## Calculating values for variables with expressions
+
+```{r,dependson="init"}
+
+DT[,list(mean(x),sum(z))]
+          V1       V2
+1: 0.06265649 1.386861
+
+DT[,table(y)]
+y
+a b c 
+3 3 3 
+```
+
+## Adding new columns
+
+```{r,dependson="init"}
+
+DT[,w:=z^2]; DT
+             x y           z           w
+1:  0.56884686 a  0.12221856 0.014937376
+2:  1.53922467 a  1.94066509 3.766181002
+3:  1.34163075 a -0.89852855 0.807353547
+4: -0.22804722 b  0.04096248 0.001677925
+5: -1.87879805 b  0.72378938 0.523871072
+6: -0.03807838 b  0.40187776 0.161505734
+7: -1.84764149 c -0.55463610 0.307621199
+8: -0.71876726 c -0.33501729 0.112236586
+9:  1.82553854 c -0.05447002 0.002966983
+
+```
+
+## Adding new columns
+
+```{r dt2,dependson="init"}
+
+DT2 <- DT
+DT[, y:= 2]
+   # Warning message
+
+```
+
+
+## Careful
+
+```{r ,dependson="dt2"}
+
+head(DT,n=3)
+           x y          z          w
+1: 0.5688469 2  0.1222186 0.01493738
+2: 1.5392247 2  1.9406651 3.76618100
+3: 1.3416307 2 -0.8985285 0.80735355
+
+head(DT2,n=3)
+           x y          z          w
+1: 0.5688469 2  0.1222186 0.01493738
+2: 1.5392247 2  1.9406651 3.76618100
+3: 1.3416307 2 -0.8985285 0.80735355
+
+```
+
+## Multiple operations
+
+```{r,dependson="init"}
+
+DT[,m:= {tmp <- (x+z); log2(tmp+5)}]; DT
+             x y           z           w        m
+1:  0.56884686 2  0.12221856 0.014937376 2.508699
+2:  1.53922467 2  1.94066509 3.766181002 3.084046
+3:  1.34163075 2 -0.89852855 0.807353547 2.444429
+4: -0.22804722 2  0.04096248 0.001677925 2.266911
+5: -1.87879805 2  0.72378938 0.523871072 1.942980
+6: -0.03807838 2  0.40187776 0.161505734 2.423255
+7: -1.84764149 2 -0.55463610 0.307621199 1.377247
+8: -0.71876726 2 -0.33501729 0.112236586 1.980470
+9:  1.82553854 2 -0.05447002 0.002966983 2.759384
+
+```
+
+---
+
+## plyr like operations
+
+```{r,dependson="init"}
+
+DT[,a:=x>0]
+             x y           z           w        m     a
+1:  0.56884686 2  0.12221856 0.014937376 2.508699  TRUE
+2:  1.53922467 2  1.94066509 3.766181002 3.084046  TRUE
+3:  1.34163075 2 -0.89852855 0.807353547 2.444429  TRUE
+4: -0.22804722 2  0.04096248 0.001677925 2.266911 FALSE
+5: -1.87879805 2  0.72378938 0.523871072 1.942980 FALSE
+6: -0.03807838 2  0.40187776 0.161505734 2.423255 FALSE
+7: -1.84764149 2 -0.55463610 0.307621199 1.377247 FALSE
+8: -0.71876726 2 -0.33501729 0.112236586 1.980470 FALSE
+9:  1.82553854 2 -0.05447002 0.002966983 2.759384  TRUE
+```
+
+---
+
+## plyr like operations
+
+```{r,dependson="init"}
+
+DT[,b:= mean(x+w),by=a]
+            x y           z           w        m     a         b
+1:  0.56884686 2  0.12221856 0.014937376 2.508699  TRUE  2.466670
+2:  1.53922467 2  1.94066509 3.766181002 3.084046  TRUE  2.466670
+3:  1.34163075 2 -0.89852855 0.807353547 2.444429  TRUE  2.466670
+4: -0.22804722 2  0.04096248 0.001677925 2.266911 FALSE -0.720884
+5: -1.87879805 2  0.72378938 0.523871072 1.942980 FALSE -0.720884
+6: -0.03807838 2  0.40187776 0.161505734 2.423255 FALSE -0.720884
+7: -1.84764149 2 -0.55463610 0.307621199 1.377247 FALSE -0.720884
+8: -0.71876726 2 -0.33501729 0.112236586 1.980470 FALSE -0.720884
+9:  1.82553854 2 -0.05447002 0.002966983 2.759384  TRUE  2.466670
+
+```
+
+---
+
+## Special variables
+
+`.N` An integer, length 1, containing the number of elements of a factor level 
+
+```{r}
+
+set.seed(123);
+DT <- data.table(x=sample(letters[1:3], 1E5, TRUE))
+DT[, .N, by=x]
+   x     N
+1: a 33387
+2: c 33201
+3: b 33412
+
+```
+
+---
+
+## Keys
+
+```{r}
+DT <- data.table(x=rep(c("a","b","c"),each=100), y=rnorm(300)); DT
+     x          y
+  1: a  0.2595897
+  2: a  0.9175107
+  3: a -0.7223183
+  4: a -0.8082840
+  5: a -0.1413520
+.......             
+296: c  1.6064561
+297: c  1.1905645
+298: c -2.1388180
+299: c  0.5035984
+300: c -0.4108657
+setkey(DT, x)
+DT['a']
+    x           y
+  1: a  0.25958973
+  2: a  0.91751072
+  3: a -0.72231834
+  4: a -0.80828402
+  5: a -0.14135202
+  6: a  2.25701345
+  7: a -2.37955015
+........
+ 96: a  1.67774776
+ 97: a -1.05205570
+ 98: a -0.63690737
+ 99: a  0.56539163
+100: a  0.38015779
+```
+
+## Joins
+
+```{r}
+DT1 <- data.table(x=c('a', 'a', 'b', 'dt1'), y=1:4); DT1
+     x y
+1:   a 1
+2:   a 2
+3:   b 3
+4: dt1 4
+
+DT2 <- data.table(x=c('a', 'b', 'dt2'), z=5:7); DT2
+     x z
+1:   a 5
+2:   b 6
+3: dt2 7
+setkey(DT1, x); setkey(DT2, x)
+merge(DT1, DT2)
+   x y z
+1: a 1 5
+2: a 2 5
+3: b 3 6
+
+```
+
+## Fast reading
+
+```{r,cache=TRUE}
+big_df <- data.frame(x=rnorm(1E6), y=rnorm(1E6))
+file <- tempfile()
+write.table(big_df, file=file, row.names=FALSE, col.names=TRUE, sep="\t", quote=FALSE)
+system.time(fread(file))
+# Read 1000000 rows and 2 (of 2) columns from 0.035 GB file in 00:00:04
+   user  system elapsed 
+   3.07    0.02    3.22 
+
+system.time(read.table(file, header=TRUE, sep="\t"))
+# user  system elapsed 
+  20.31    0.11   20.58 
+
+```
+
+## Summary and further reading
+
+* The latest development version contains new functions like `melt` and `dcast` for data.tables 
+  * [https://r-forge.r-project.org/scm/viewvc.php/pkg/NEWS?view=markup&root=datatable](https://r-forge.r-project.org/scm/viewvc.php/pkg/NEWS?view=markup&root=datatable)
+* Here is a list of differences between data.table and data.frame
+  * [http://stackoverflow.com/questions/13618488/what-you-can-do-with-data-frame-that-you-cant-in-data-table](http://stackoverflow.com/questions/13618488/what-you-can-do-with-data-frame-that-you-cant-in-data-table)
+* Notes based on Raphael Gottardo's notes [https://github.com/raphg/Biostat-578/blob/master/Advanced_data_manipulation.Rpres](https://github.com/raphg/Biostat-578/blob/master/Advanced_data_manipulation.Rpres), who got them from Kevin Ushey.

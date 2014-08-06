@@ -1,0 +1,635 @@
+---
+title: "Epi Aragon basic"
+author: "Juanjo Moreiras"
+date: "Thursday, July 31, 2014"
+output: html_document
+---
+---
+title: "Epi Aragon Very Basic"
+author: "Juanjo Moreiras"
+date: "Thursday, July 31, 2014"
+output: html_document
+-----
+
+##------------------EPIDEMIOLOGY ARAGON VERY BASIC EDA--------------------------
+
+#_____IMPORT, EDIT, SORT, INDEX(SUBSET), TRANSFORM, MERG, MISSING ______
+
+##__ 1. IMPORTING DATA FROM A FILE (pag. 115)__
+#_ 1.1 READING AS ASCII TEXT DATA FILE
+
+# Using University Group Diabetes Program randomized clinical trial text
+# Data file is comma-delimite with row names and a header (ugdp.txt)
+
+```{r Aragon}
+setwd("~/DataScientist/RUcla/RUclaData")
+
+ud <- read.table("http://www.medepi.net/data/ugdp.txt",
+                 header = TRUE, sep = ",")
+head(ud)
+
+# The same data, but without row names and without header
+cnames <- c("Status", "Treatment", "Agegrp")
+udat2 <- read.table("http://www.medepi.net/data/ugdp2.txt",
+                    + header = FALSE, sep = ",", col.names = cnames)
+head(udat2)
+# The same data file as it might appear as a ?x formatted file, (fwf)
+# Needs a data dictionary to know which columns contains which fields
+
+cnames <- c("Status", "Treatment", "Agegrp")
+udat3 <- read.fwf("http://www.medepi.net/data/ugdp3.txt",
+                  width = c(8, 11, 3), col.names = cnames, 
+                  strip.white = TRUE)
+head(udat3)
+
+# The same data as a fixed width formatted file but with numeric codes
+# Needs a data dictionary
+
+cnames <- c("Status", "Treatment", "Agegrp")
+udat4 <- read.fwf("http://www.medepi.net/data/ugdp4.txt",
+                  width = c(1, 1, 1), col.names = cnames)
+head(udat4)
+```
+
+#_ 1.2 READING DATA FROM BINARY FORMAT: e.g., STATA
+
+```{r Aragon}
+
+library(foreign)
+# For example: 
+idat <- read.dta("c:/.../data/infert.dta")
+```
+
+#_ 1.3 IMPORTING DATA USING URL
+# loading the Western Collaborative Group Study from a web server
+
+```{r Aragon}
+wdat <- read.table("http://www.medepi.net/data/wcgs.txt",
+                   header = TRUE, sep = ",")
+str(wdat)
+```
+
+##__ 2. EDITING DATA __
+#_ 2.1 EDIT OR FIX FUNCTIONS
+
+```{r}
+
+# Using WNV surveillance raw data as a data frame
+wd <- read.table("http://www.medepi.net/data/wnv/wnv2004raw.txt",
+                 header = TRUE, sep = ",", as.is = TRUE)
+str(wd) 
+
+# First assess in each variable, what needs to be "cleaned up"
+lapply(wd, table) #apply ’table’ function to fields
+
+# The results showed: we have 779 obs and variables with missing values
+# Missing values need to be converted to NAs
+wd[wd=="." | wd=="Unknown"] <- NA
+
+# Evalute a variable to verify if missing values were converted to NAs
+table(wd$death)     #(without NAs)
+table(wd$death, exclude=NULL)   #(with NAs)
+```
+
+#_ 2.2 TEXT PROCESSING
+
+```{r Aragon}
+# e.g.,using "substr" fraction: "mm/dd/yy" to "yyyy-mm-dd"
+bd <- c("07/17/96","12/09/00","11/07/97")
+mon <- substr(bd, start=1, stop=2); mon
+day <- substr(bd, 4, 5); day
+yr <- as.numeric(substr(bd, 7, 8)); yr
+yr2 <- ifelse(yr<=19, yr+2000, yr+1900); yr2
+bdfin <- paste(yr2, "-", mon, "-", day, sep=""); bdfin
+
+# e.g.,with "substr": “00” to “2000”, and “96”,“97 to “1996”,“1997”
+bd
+substr(bd, 3, 3) <- "-"
+substr(bd, 6, 6) <- "-"
+bd
+```
+
+##__ 3. SORTING DATA __
+# Using sort function
+
+```{r}
+sort (x)
+sort(x, decreasing = TRUE)
+rev(sort(x))
+
+# Using "order" function
+# Sort one vector with ordering elements form another vector
+x <- sample(1:20, 5); x
+sort(x) #sorts as expected
+y <- sample(1:20, 5); y
+order(y)       #4th element to 1st position, 5th to 2nd, etc.
+x[order(y)]    #use order(y) to sort elements of x
+```
+
+#_3.1 SORTING DATA FRAMES
+# Creating a small data set
+
+```{r}
+sex <- rep(c("Male", "Female"), c(4, 4))
+ethnicity <- rep(c("White", "African American", "Latino",
+                   "Asian"), 2)
+age <- sample(1:100, 8)
+dat <- data.frame(age, sex, ethnicity)
+dat <- dat[sample(1:8, 8),] #randomly order rows
+dat
+
+# Sort based on the ordering of one variable
+dat[order(dat$age),]
+
+# Sort based on the ordering of two variables
+dat[order(dat$sex, dat$age),] 
+```
+
+##__ 4. INDEXING (SUBSETTING) DATA __
+
+```{r}
+# Using the Oswego foodborne illness dataset
+odat <- read.table("http://www.medepi.net/data/oswego.txt",
+                   header = TRUE, as.is = TRUE, sep = "")
+str(odat)
+```
+
+#_4.1 INDEXING
+# Indexing rows with cases
+# First create a new data with only cases
+# Generate a logical vector TRUE for every value of odat$ill
+
+```{r}
+cases <- odat$ill=="Y"
+cases
+
+# we extracted rows with cases by indexing the data with a logical vector 
+odat.ca <- odat[cases, ]
+odat.ca[, 1:8]
+
+# e.g., Let’s create a data set with female cases
+# age less than the median age, and consumed vanilla ice cream
+fem.cases.vic <- odat$ill=="Y" & odat$sex=="F" &
+  odat$vanilla.ice.cream=="Y" & odat$age < median(odat$age)
+odat.fcv <- odat[fem.cases.vic, ]
+odat.fcv[ , c(1:6, 19)]
+```
+
+#_4.2 SUBSETTING
+# Using "subset" function
+# Using data with female cases, age <median, and ate vanilla ice cream
+# the ?rst argument is the data frame object name
+# the second argument (subset) evaluates to a logical vector
+# Third argument (slect) specifies the fields to keep
+
+```{r}
+odat.fcv <- subset(odat, subset = {ill=="Y" & sex=="F" &
+                                     vanilla.ice.cream=="Y" & age < median(odat$age)},
+                   select = c(id:onset.date, vanilla.ice.cream))  #there is an error
+odat.fcv
+```
+
+##__ 5. TRANSFORMING DATA __
+#_5.1 CREATING CATEGORICAL VARIABLES (FACTORS)
+
+```{r}
+# Using the Oswego foodborne illness dataset
+odat <- read.table("http://www.medepi.net/data/oswego.txt",
+                   header = TRUE, as.is = TRUE, sep = "")
+
+# create new variable with seven age categories
+# < 1, 1 to 4, 5 to 14, 15 to 24, 25 to 44, 45 to 64, and 65+
+# Using several methods
+
+# Using "cut" function
+agecat <- cut(odat$age, breaks = c(0, 1, 5, 15, 25, 45, 65, 100))
+agecat
+
+# The notation (15,25] means open left boundary (>15), closed right (<=25)
+# It is better use closed left and open right boundaries [15,25)
+agecat <- cut(odat$age, breaks = c(0, 1, 5, 15, 25, 45,
+                                   65, 100), right = FALSE)
+agecat
+
+# Adding labels since we are notfamiliar with open and closed notations
+agelabs <- c("<1", "1-4", "5-14", "15-24", "25-44", "45-64","65+")
+agecat <- cut(odat$age, breaks = c(0, 1, 5, 15, 25, 45,
+                                   65, 100), right = FALSE, labels = agelabs)
+agecat
+table(agecat, case = odat$ill)
+```
+
+#_ 5.2 RE-CODING LEVELS OF A CATEGORICAL VARIABLE
+
+# keeping track of integer codes for categorical variables is unnecessary
+# however, if we feel the need to do so, here’s how.
+
+```{r}
+# Create categorical variable
+ethlabs <- c("White", "Black", "Latino", "Asian")
+ethnicity <- sample(ethlabs, 100, replace = T)
+ethnicity <- factor(ethnicity, levels = ethlabs)
+ethnicity
+#[1] White  White  Latino White  Latino Asian  White  Asian  White  Black 
+# [11] Black  Asian  White  Asian  Latino Latino Latino White  Black  White 
+# [21] White  Latino White  Black  Latino Asian  Asian  White  White  Latino
+# [31] Black  Black  Black  Black  Latino Latino Asian  Asian  White  Latino
+# [41] Black  Asian  Latino Latino Black  White  Black  White  Black  Black 
+# [51] Asian  Latino Latino Black  Latino Latino Latino Latino Asian  Asian 
+# [61] Latino Black  Latino White  Latino White  Black  White  White  White 
+# [71] Asian  White  Black  Black  White  Black  Latino Latino Latino Latino
+# [81] Black  Black  Asian  Black  White  Black  Latino White  Black  Latino
+# [91] Asian  Black  Asian  Asian  Asian  Latino Asian  Latino White  Black 
+# Levels: White Black Latino Asian
+
+# The first level option is the reference level 
+#Displaying the numeric code with "unclass" function
+x <- unclass(ethnicity); x
+
+# To recover the original factor,
+factor(x,labels=levels(x))
+# [1] White  White  Latino White  Latino Asian  White  Asian  White  Black 
+# [11] Black  Asian  White  Asian  Latino Latino Latino White  Black  White 
+# [21] White  Latino White  Black  Latino Asian  Asian  White  White  Latino
+# [31] Black  Black  Black  Black  Latino Latino Asian  Asian  White  Latino
+# [41] Black  Asian  Latino Latino Black  White  Black  White  Black  Black 
+# [51] Asian  Latino Latino Black  Latino Latino Latino Latino Asian  Asian 
+# [61] Latino Black  Latino White  Latino White  Black  White  White  White 
+# [71] Asian  White  Black  Black  White  Black  Latino Latino Latino Latino
+# [81] Black  Black  Asian  Black  White  Black  Latino White  Black  Latino
+# [91] Asian  Black  Asian  Asian 
+
+# we can re-label the levels using the "levels" function
+# and assigning to it a character vector of new labels
+# Make sure the order of the new labels corresponds toorder of the factor levels 
+levels(ethnicity2) <- c("Caucasion", "African American",
+                        "Hispanic", "Asian")
+table(ethnicity2)
+
+# re-order and re-label at the same time using the levels function
+table(ethnicity)
+# ethnicity
+# White  Black Latino  Asian 
+#25     26     30     19 
+ethnicity3 <- ethnicity
+levels(ethnicity3) <- list(Hispanic = "Latino", Asian = "Asian",
+                           Caucasion = "White", "African American" = "Black")
+table(ethnicity3)
+# ethnicity3
+# Hispanic            Asian        Caucasion African American 
+#  30               19               25               26 
+
+# Sorting the factor levels by using the factor function
+table(ethnicity)
+ethnicity
+# White Black Latino Asian
+# 23 31 28 18
+ethnicity5a <- factor(ethnicity, sort(levels(ethnicity)))
+table(ethnicity5a)
+ethnicity5a
+# ethnicity5a
+# Asian  Black Latino  White 
+#19     26     30     25
+```
+
+5.3_ SETTING FACTOR REFERENCE LEVEL
+
+```{r}
+# Using the "relevel" function
+levels(ethnicity)
+# [1] "White" "Black" "Latino" "Asian"
+ethnicity6 <- relevel(ethnicity, ref = "Asian")
+levels(ethnicity6)
+# [1] "Asian" "White" "Black" "Latino"
+```
+
+5.4_ FACTORS INSTEAD OF DUMMY VARIABLES
+# it is unnecessary to create dummy variables
+# create a factor with number of levels and set the reference level.
+-------
+  
+5.5_ CONDITIONALLY TRANSFORMING ELEMENTS OF A VECTOR
+
+```{r}
+# Using "ifelse" factor
+# works as: ifelse(test, if test = TRUE do this, else do this)
+x <- sample(c("M", "F"), 10, replace = T); x
+# [1] "M" "F" "M" "F" "M" "F" "M" "F" "M" "F"
+
+y <- ifelse(x=="M", "Male", "Female"); y
+# [1] "Male" "Female" "Male" "Female" "Male" "Female"
+# [7] "Male" "Female" "Male" "Female"
+```
+
+##6. __ MERGING DATA __
+
+# Usually not necessary to merge data objects into one data object
+# On occasion is necessary to merge two data frames into one data frames
+
+# Look two related data frames that are linked by an indexing ?eld
+# First data frame contains telephones for 5 employees and fname is the indexing ?eld
+
+# For example:
+# phone
+#   fname phonenum phonetype
+# 1 Tomas 643-4935 work
+# 2 Tomas 847-9139 mobile
+# 3 Tomas 643-4926 fax
+# 4 Chris 643-3932 work
+# 5 Chris 643-4926 fax
+# 6 Wayne 643-4934 work
+# 7 Wayne 643-4926 fax
+# 8 Ray 643-4933 work
+# 9 Ray 643-4926 fax
+# 10 Diana 643-3931 work
+
+#The second data are email for 3 employees and name is the indexing ?eld
+# > email
+#   name mail mailtype
+# 1 Tomas aragon@berkeley.edu Work
+# 2 Tomas aragon@medepi.net Personal
+# 3 Wayne enanoria@berkeley.edu Work
+# 4 Wayne enanoria@idready.org Work
+# 5 Chris csiador@berkeley.edu Work
+# 6 Chris csiador@yahoo.com Personal
+
+```{r}
+# To merge these two data frames use the "merge" function
+dat <- merge(email, phone, by.x="name", by.y="fname")
+dat
+# name mail mailtype phonenum phonetype
+# 1 Chris csiador@berkeley.edu Work 643-3932 work
+# 2 Chris csiador@yahoo.com Personal 643-3932 work
+# 3 Chris csiador@berkeley.edu Work 643-4926 fax
+# 4 Chris csiador@yahoo.com Personal 643-4926 fax
+# 5 Tomas aragon@berkeley.edu Work 643-4935 work
+# 6 Tomas aragon@medepi.net Personal 643-4935 work
+# 7 Tomas aragon@berkeley.edu Work 847-9139 mobile
+# 8 Tomas aragon@medepi.net Personal 847-9139 mobile
+# 9 Tomas aragon@berkeley.edu Work 643-4926 fax
+# 10 Tomas aragon@medepi.net Personal 643-4926 fax
+# 11 Wayne enanoria@berkeley.edu Work 643-4934 work
+# 12 Wayne enanoria@idready.org Work 643-4934 work
+# 13 Wayne enanoria@berkeley.edu Work 643-4926 fax
+# 14 Wayne enanoria@idready.org Work 643-4926 fax
+
+dat <- merge(phone, email, by.x="fname", by.y="name")
+dat
+# fname phonenum phonetype mail mailtype
+# 1 Chris 643-3932 work csiador@berkeley.edu Work
+# 2 Chris 643-4926 fax csiador@berkeley.edu Work
+# 3 Chris 643-3932 work cvsiador@yahoo.com Personal
+# 4 Chris 643-4926 fax cvsiador@yahoo.com Personal
+# 5 Tomas 643-4935 work aragon@berkeley.edu Work
+# 6 Tomas 847-9139 mobile aragon@berkeley.edu Work
+# 7 Tomas 643-4926 fax aragon@berkeley.edu Work
+# 8 Tomas 643-4935 work aragon@medepi.net Personal
+# 9 Tomas 847-9139 mobile aragon@medepi.net Personal
+# 10 Tomas 643-4926 fax aragon@medepi.net Personal
+# 11 Wayne 643-4934 work enanoria@berkeley.edu Work
+# 12 Wayne 643-4926 fax enanoria@berkeley.edu Work
+# 13 Wayne 643-4934 work enanoria@idready.org Work
+# 14 Wayne 643-4926 fax enanoria@idready.org Work
+
+# The by.x and by.y options identify the indexing ?elds
+# To merge the union of the indexing ?elds, set all=TRUE
+dat <- merge(phone, email, by.x="fname", by.y="name",
+             all=TRUE)
+dat
+# 1 Chris 643-3932 work csiador@berkeley.edu Work
+# 2 Chris 643-4926 fax csiador@berkeley.edu Work
+# 3 Chris 643-3932 work csiador@yahoo.com Personal
+# 4 Chris 643-4926 fax csiador@yahoo.com Personal
+# 5 Diana 643-3931 work <NA> <NA>
+# 6 Ray 643-4933 work <NA> <NA>
+# 7 Ray 643-4926 fax <NA> <NA>
+# 8 Tomas 643-4935 work aragon@berkeley.edu Work
+# 9 Tomas 847-9139 mobile aragon@berkeley.edu Work
+# 10 Tomas 643-4926 fax aragon@berkeley.edu Work
+# 11 Tomas 643-4935 work aragon@medepi.net Personal
+# 12 Tomas 847-9139 mobile aragon@medepi.net Personal
+# 13 Tomas 643-4926 fax aragon@medepi.net Personal
+# 14 Wayne 643-4934 work enanoria@berkeley.edu Work
+# 15 Wayne 643-4926 fax enanoria@berkeley.edu Work
+# 16 Wayne 643-4934 work enanoria@idready.org Work
+# 17 Wayne 643-4926 fax enanoria@idready.org Work
+```
+
+##__ 7. MISSING AND "NOT AVAILABLE" VALUES (page 142)
+
+```{r}
+
+# NAs not always represents a missing value
+# Objects tha contain NA return NA
+# Removing NAs with na.rm option
+sum(x) # answer NA
+Mean(x) # answer NA
+sum(x, na.rm = TRUE)  # better
+mean(x, na.rm = TRUE) # better
+```
+
+#_ 7.1 TESTING, INDEXING, REPLACING, RECODING
+
+```{r}
+# using is.na generateS a logical vector to identify positions OD NAs
+x <- c(10, NA, 33, NA, 57)
+y <- c(NA, 24, NA, 47, NA)
+
+is.na(x)               #generate logical vector
+# [1] FALSE TRUE FALSE TRUE FALSE
+
+which(is.na(x))        #which positions are NA
+# [1] 2 4
+
+x[!is.na(x)]           #index original vector
+[1] 10 33 57
+
+y[is.na(x)]            #index other vector
+[1] 24 47
+
+x[is.na(x)] <- 999     #replacement
+x
+#[1] 10 999 33 999 57
+
+# recoding missing values to NA with replacement
+x <- c(1, -99, 3, -88, 5)
+x[x==-99 | x==-88] <- NA
+x
+#[1] 1 NA 3 NA 5
+
+#Recoding missing values to NA using replacement
+fname <- c("Tom", "Unknown", "Jerry")
+age <- c(56, 34, -999)
+z1 <- z2 <- data.frame(fname, age)
+z1
+#  fname age
+# 1 Tom 56
+# 2 Unknown 34
+# 3 Jerry -999
+
+# Replacement one column at a time
+z1$fname[z1$fname=="Unknown"] <- NA
+z1$age[z1$age==-999] <- NA
+z1
+#  fname age
+# 1 Tom 56
+# 2 <NA> 34
+# 3 Jerry NA
+
+# Global replacement
+z2[z2=="Unknown" | z2==-999] <- NA
+z2
+#  fname age
+# 1 Tom 56
+# 2 <NA> 34
+# 3 Jerry NA
+```
+
+#_ 7.2 IMPORTING MISSING VALUES WITH READ.TABLE FUNCTION
+
+# The default setting is na.strings="NA"
+# na.strings option to specify what characters are to be converted to NA
+# Blank ?elds are also considered to be missing values
+
+```{r}
+# Suppose the data contains 999, 888, and . to represent missing values
+
+mydat <- read.table("dataset.txt", na.strings = c(999, 888, "."))
+
+# If a number, say 999, represents a missing value in one ?eld but a valid value in
+another ?eld
+# import the data using the as.is=TRUE option
+# Then replace missing values in the data one ?eld at a time, 
+# And convert categorical variables to factors
+```
+
+## 8__ DATES AND TIMES __  (some examples)
+# 8.1_ AS.DATE FUNCTION
+
+```{r}
+
+# as.Date function converts calendar dates ino a Date objects
+bdays <- c("11/2/1959", "1/1/1970")
+bdays
+# "11/2/1959" "1/1/1970"
+
+#convert to Julian dates
+bdays.julian <- as.Date(bdays, format = "%m/%d/%Y")
+bdays.julian
+#"1959-11-02" "1970-01-01"
+
+#Although this looks a character vectors. it is class "Date"
+#display Julian dates
+as.numeric(bdays.julian)
+# [1] -3713 0
+
+#calculate age as of today’s date
+date.today <- Sys.Date()
+date.today
+#[1] "2005-09-25"
+
+age <- (date.today - bdays.julian)/365.25
+age
+
+#Time differences of 45.89733, 35.73169 days
+#the display of ’days’ is not correct
+#truncate number to get "age"
+age2 <- trunc(as.numeric(age))
+age2
+# [1] 45 35
+
+## create date frame
+bd <- data.frame(Birthday = bdays, Standard = bdays.julian,
+                 Julian = as.numeric(bdays.julian), Age = age2)
+bd
+#   Birthday Standard Julian Age
+#1 11/2/1959 1959-11-02 -3713 45
+#2 1/1/1970 1970-01-01 0 35 
+
+# Selected format options; for a complete list see help(strptime).
+"%a" Abbreviated weekday name.
+"%A" Full weekday name.
+"%b" Abbreviated month name.
+"%B" Full month name.
+"%d" Day of the month as decimal number (01-31)
+"%j" Day of year as decimal number (001-366).
+"%m" Month as decimal number (01-12).
+"%U" Week of the year as decimal number (00-53) using the
+first Sunday as day 1 of week 1.
+"%w" Weekday as decimal number (0-6, Sunday is 0).
+"%W" Week of the year as decimal number (00-53) using the
+first Monday as day 1 of week 1.
+"%y" Year without century (00-99). If you use this on input,
+which century you get is system-specific. So don’t!
+  Often values up to 69 (or 68) are prefixed by 20 and
+70-99 by 19.
+"%Y" Year with century.
+
+# Some examples of converting dates with different formats:
+as.Date("November 2, 1959", format = "%B %d, %Y")
+# [1] "1959-11-02"
+# as.Date("11/2/1959", format = "%m/%d/%Y")
+# [1] "1959-11-02"
+#caution using 2-digit year
+as.Date("11/2/59", format = "%m/%d/%y")
+# [1] "2059-11-02"
+as.Date("02Nov1959", format = "%d%b%Y")
+# [1] "1959-11-02"
+# caution using 2-digit year
+as.Date("02Nov59", format = "%d%b%y")
+# [1] "2059-11-02"
+# standard format does not require format option
+as.Date("1959-11-02")
+# [1] "1959-11-02"
+
+#The weekdays, months, quarters, julian functions
+mydates <- c("2004-01-15","2004-04-15","2004-10-15")
+mydates <- as.Date(mydates)
+weekdays(mydates)
+# [1] "Thursday" "Thursday" "Friday"
+months(mydates)
+# [1] "January" "April" "October"
+quarters(mydates)
+# [1] "Q1" "Q2" "Q4"
+julian(mydates)
+# [1] 12432 12523 12706
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

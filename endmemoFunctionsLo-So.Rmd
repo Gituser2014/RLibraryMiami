@@ -1,0 +1,142 @@
+---
+title: "Endmemo Functions Sp-Z"
+author: "Juanjo Moreiras"
+date: "Monday, July 28, 2014"
+output: html_document
+---
+
+### ---------------------"split" function-----------------
+
+## split() function divides the data in a vector. unsplit() funtion do the reverse.
+
+split(x, f, drop = FALSE, ...)
+split(x, f, drop = FALSE, ...) <- value
+unsplit(value, f, drop = FALSE)
+
+x: vector, data frame
+f: indices
+drop: discard non existing levels or not
+
+```{r}
+## Let first read in the data from the file:
+x <- read.csv("anova.csv",header=T,sep=",")
+
+## Split the "Expression" values into two groups based on "Gender" variable, "f" for female group, and "m" for male group:
+g <- split(x$Expression, x$Gender); g
+$f
+  [1] -0.66 -1.15 -0.30 -0.40 -0.24 -0.92  0.48 -1.68 -0.80 -0.55 -0.11 -1.26
+ [13] -0.11  0.13  0.81  0.45  0.74 -0.31 -0.18 -0.08  0.54 -0.35  0.38 -0.39
+ [25] .....................
+[121]  0.97 -0.72 -0.04  0.38 -1.87 -2.09 -1.54  0.09 -0.25  0.51  0.33 -1.29
+[133] -0.51 -0.50 -0.52
+$m
+  [1] -0.54 -0.80 -1.03 -0.41 -1.31 -0.43  1.01  0.14  1.42 -0.16  0.15 -0.62
+ [13] -0.42 -0.35 -0.42  0.32 -0.57 -0.07 -0.06  0.02 -0.39 -0.74 -0.09 -0.03...
+.......
+[133] -0.39 -0.40  1.18 -0.30 -1.91 -1.14  0.13 -0.34 -0.44  0.52  1.11 -0.89
+[145] -0.17 -1.62
+
+## Calculate the length, mean value of each group:
+sapply(g,length)
+  f   m 
+135 146 
+
+sapply(g,mean)
+         f          m 
+-0.3946667 -0.2227397
+
+## You may use lapply, return is a list:
+lapply(g,mean)
+$f
+[1] -0.3946667
+$m
+[1] -0.2227397
+
+## unsplit() function combines the groups:
+unsplit(g,x$Gender)
+```
+
+###--------------"string" Functions----------------
+
+## "string"" functions include substr(x), nchar(x), toupper(x), tolower(x), strsplit(x,y),paste(...), and regular expression functions sub(...), grep(...) etc.
+
+```{r}
+s <- "EndMemo.com R Language Tutorial"
+substr(s,0,7)
+[1] "EndMemo"
+
+## Get string length: 
+nchar(s)
+[1] 31
+
+## To uppercase:
+x <- toupper(s); x
+[1] "ENDMEMO.COM R LANGUAGE TUTORIAL"
+
+##To lowercase:
+x <- tolower(s); x
+[1] "endmemo.com r language tutorial"
+
+## Split the string at letter "o":
+x <- strsplit(s,"o")
+[[1]]
+[1] "EndMem"           ".c"               "m R Language Tut" "rial"
+
+## Concatenate two strings:
+x <- paste(x," -- String Functions",sep=""); x
+[1] "endmemo.com r language tutorial -- String Functions"
+
+## Substring replacement:
+x <- sub("Tutorial","Examples",s); x
+[1] "EndMemo.com R Language Examples"
+
+## Use regular expression:
+>x <- sub("n.+e","XXX",s); x
+>x
+[1] "EXXX Tutorial"
+
+## Please see grep() function for more regular expression handling of string.
+```
+
+### R "tapply" function
+
+## tapply() applies a function to each cell of a ragged array.
+
+tapply(X, INDEX, FUN = NULL, ..., simplify = TRUE)
+
+. X: vector
+. INDEX: list of one of more factors
+. FUN: the function
+```{r}    
+Orange            #R built-in dataset, Growth of Orange Trees
+   Tree  age circumference
+1     1  118            30
+2     1  484            58
+3     1  664            87
+4     1 1004           115
+5     1 1231           120
+.........
+34    5 1372           174
+35    5 1582           177
+
+## Calculate the mean circumference of different Tree groups:
+tapply(Orange$circumference,Orange$Tree,mean)
+        3         1         5         2         4 
+ 94.00000  99.57143 111.14286 135.28571 139.28571 
+
+# Return a list:
+tapply(Orange$circumference,Orange$Tree,mean,simplify=FALSE)
+$`3`
+[1] 94
+$`1`
+[1] 99.57143
+$`5`
+[1] 111.1429
+$`2`
+[1] 135.2857
+$`4`
+
+[1] 139.2857
+. simplify: if true, return an array of scalar, other wise an array of list
+```
+

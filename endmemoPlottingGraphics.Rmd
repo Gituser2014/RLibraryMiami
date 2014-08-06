@@ -1,0 +1,216 @@
+---
+title: "Endmemo Plotting and Graphics"
+author: "Juanjo Moreiras"
+date: "Monday, July 28, 2014"
+output: html_document
+---
+###----------------Bar Chart Plot---------
+
+## barplot(...) funtion plot a bar chart. It's usage is
+
+barplot(height, width = 1, space = NULL,
+        names.arg = NULL, legend.text = NULL, beside = FALSE,
+        horiz = FALSE, density = NULL, angle = 45,
+        col = NULL, border = par("fg"),
+        main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+        xlim = NULL, ylim = NULL, xpd = TRUE, log = "",
+        axes = TRUE, axisnames = TRUE,
+        cex.axis = par("cex.axis"), cex.names = par("cex.axis"),
+        inside = TRUE, plot = TRUE, axis.lty = 0, offset = 0,
+        add = FALSE, args.legend = NULL, ...)
+
+height: Vector of each bar heights
+width: Vector of bar width
+space: Space between bars
+col: Vector of color for each ba
+
+```{r}
+## First let's make a simple bar chart:
+x <- c(3,2,6,8,4)
+barplot(x)
+
+## Let's add some annotations:
+barplot(x,border="tan2",names.arg=c("Jan","Feb","Mar","Apr","May"),
+ xlab="Month",ylab="Revenue",density=c(0,5,20,50,100))
+
+##Suppose the bar chart above is about software department of our company, we are going to compare other department's revenues including hardware and services:
+A <- matrix(c(3,5,7,1,9,4,6,5,2,12,2,1,7,6,8),nrow=3,ncol=5,byrow=TRUE)
+barplot(A,main="total revenue",names.arg=c("Jan","Feb","Mar","Apr","May"),
+ xlab="month",ylab="revenue",col=c("tan2","blue","darkslategray3"))
+legend(x=0.2,y=24,c("soft","hardware","service"),cex=.8, 
+ col=c("tan2","blue","darkslategray3"),pch=c(22,0,0))
+
+## Let's compare the data sets horizontally:
+barplot(A,main="total revenue",beside=TRUE,
+ names.arg=c("Jan","Feb","Mar","Apr","May"),
+ xlab="month",ylab="revenue",col=c("tan2","blue","darkslategray3"))
+legend(x=1,y=11,c("soft","hardware","service"),cex=.8, 
+ col=c("tan2","blue","darkslategray3"),pch=c(22,0,0))
+```
+
+###--------------Boxplot--------------
+
+## Boxplot usually refers to box-and-whisker plot, which is a popular method to show data by drawing a box around the 1st and 3rd quartile, and the whiskers for the smallest and largest data values, the median is represented by a bold line in the box. 
+
+Following is a csv file example "boxplot.csv", we will draw a boxplot of "Expression" based on Subtype "A", "B" and "C": 
+
+```{r, echo=FALSE}
+## Let first read in the data from the file:
+x <- read.csv("boxplot.csv",header=T,sep="\t")
+x <- t(x)
+a <- as.numeric(x[2,1:143])
+b <- as.numeric(x[2,144:218])
+c <- as.numeric(x[2,219:ncol(x)])
+
+Box plot based on subtype A, B and C:
+ boxplot(a,b,c,col=c("red","blue","green"),names=c("A","B","C"),
++ xlab="Subtype",ylab="Expression")
+```
+
+###--------------Colors Chart--------------
+
+## R has 657 built-in color names. The function colors() will show all of them. All these color names can be used in plot parameters like col=. The function col2rgb() can convert all these colors into RGB numbers.
+
+---------------------
+
+###____________Histogram---------------
+Histogram is a popular descriptive statistical method that shows data by dividing the range of values into intervals and plotting the frequency/density per interval as a bar. 
+
+hist(x, breaks = "Sturges", freq = NULL,  ...)
+
+x: value vector
+breaks: number of bars
+
+```{r}
+## Let first read in the data from the file:
+
+x <- read.csv("histogram.csv",header=T,sep="\t")
+x <- t(x)
+ex <- as.numeric(x[2,1:ncol(x)])
+
+#Plot a histogram:
+hist(ex)
+
+## The above plot is just a basic histogram. Let's add some parameters: 
+
+#.br=20,                           #divide the data into 20 bars
+#.col="blue",                      #fill in blue color
+#.main="Histogram of Expression",  #title of the histogram
+#.xlab="Expression",               #x axis description
+#.ylab="Frequency",                #y axis description
+#.freq=TRUE,                       #y axis is the frequency of each interval
+
+## Here is the command:
+hist(ex,br=14,col="blue",xlab="Expression",ylab="Frequency",
+freq=TRUE,main="Histogram of Expression")
+
+## To add a density line into the histogram, we need to change two parameters: 
+#.freq=FALSE, #y axis is the density value of each interval
+#.ylab="Density",  #y axis description as Density
+
+##Here is the command:
+hist(ex,br=14,col="blue",xlab="Expression",ylab="Density",freq=FALSE,
++main="Histogram of Expression")
+lines(density(ex),col="red")
+```
+
+###---------------"plot"------------------
+
+## plot(...) is a generic X Y plotting function. It's usage is:
+
+plot(x, y = NULL, type = "p",  xlim = NULL, ylim = NULL,
+     log = "", main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+     ann = par("ann"), axes = TRUE, frame.plot = axes,
+     panel.first = NULL, panel.last = NULL, asp = NA, ...)
+
+x,y:Vector of coordinates
+```{r}
+## First let's make a simple plot:
+>x <- c(1.2,3.4,1.3,-2.1,5.6,2.3,3.2,2.4,2.1,1.8,1.7,2.2)
+>y <- c(2.4,5.7,2.0,-3,13,5,6.2,4.8,4.2,3.5,3.7,5.2)
+>plot(x,y)
+
+##The par(...) controls the general layout of the plot. For example, par(mar = c(5, 4, 2, 1)) defines the bottom margin as 5, left margin 4, top margin 2 and right margin as 1. The default type is a point plot (type="p"). The possible types include:
+
+## Add more data to the plot:
+>abline(v=0,col="red") #add a vertical line at x=0
+>points(c(1,4),c(9,2),pch=3,col="tan2") #add two points
+>x2 <- c(-1.5,1,4)
+>y2 <- c(3,2,8)
+>lines(x2,y2,col="darkolivegreen3")  #add aother group of data
+>legend(x=-2.2,y=11,c("advertise","sale"),cex=.8, 
++ col=c("blue","darkolivegreen3"),lty=c(1,1)) #add legend
+```
+
+###------------Quantile-Quantile Plot -----------
+
+## Quantile-Quantile plot is a popular method to display data by plot the quantiles of the values against the corresponding quantiles of the normal (bell shapes). The quantiles of the standard normal distribution is represented by a straight line. The normality of the data can be evaluated by observing the extent in which the points appear on the line.
+```{r}
+## Let first read in the data from the file:
+
+    > x <- read.csv("histogram.csv",header=T,sep="\t")
+    > x <- t(x)
+    > ex <- as.numeric(x[2,1:ncol(x)])
+
+Draw a Quantile-Quantile plot:
+
+    > qqnorm(ex)
+    > qqline(ex,col="red")
+
+## The above plot shows that most of the data points are on or near the straight line, suggests that the data is almost normally distributed. 
+
+For further test of the data normality, we can check the mean and median of the dataset.
+
+    > mean(ex)
+    [1] -0.3053381
+    > median(ex)
+    [1] -0.29
+
+## Mean is the average of the values, and the median is the second quartile, when the data is normally distributed around the mean, then the mean and median should be equal. Since the mean and median above (-0.3053381 vs -0.29) are very close, so the data is seems quite symmetric.
+```
+
+
+###--------------Scatter Plots----------------
+
+```{r}
+## Let first read in the data from the file:
+    x <- read.csv("scatterplot.csv",header=T,sep="\t")
+    x <- t(x)
+    ex <- as.numeric(x[2,1:ncol(x)])
+    qu <- as.numeric(x[3,1:ncol(x)])
+
+## Draw a Scatter Plot:
+    plot(ex,qu)
+    
+
+## If we want to draw different subtype in different color and symbol, we need more work like follows:
+
+    plot(ex,qu,col="white",xlab="Expression", ylab="Quality")
+    points(ex[1:143],qu[1:143],col="red",pch=3,cex=.6) #Subtype A
+    points(ex[144:218],qu[144:218],col="blue",pch=19,cex=.6) #Subtype B
+    points(ex[219:ncol(x)],qu[219:ncol(x)],col="black",,pch=1,cex=.6) #Subtype C
+    abline(lm(ex[144:218] ~ qu[144:218]),col="blue") #regression expression ~ quality of B
+
+## Following code can add a legend on the right:
+
+    layout(matrix(c(1,2), nrow = 1), widths = c(0.7, 0.3))
+    par(mar = c(5, 4, 4, 2) + 0.1)
+    plot(ex,qu,col="white",xlab="Expression", ylab="Quality")
+    points(ex[219:ncol(x)],qu[219:ncol(x)],col="black",,pch=1,cex=.6)
+    points(ex[144:218],qu[144:218],col="blue",pch=19,cex=.6)
+    points(ex[1:143],qu[1:143],col="red",cex=.6,pch=3)
+    abline(lm(ex[144:218] ~ qu[144:218]),col="blue")
+    par(mar = c(5, 0, 4, 1) + 0.1)
+    plot(ex,qu,axes=FALSE,ann=FALSE, col="white")
+    legend(x=-2.5,y=1.2,c("A (n=146)","B (n=77)","C (n=85)"),cex=.8, pch=c(1,19,3),col=c("black","blue", "red"))
+
+## R package "scatterplot3d" can be used to draw 3D scatter plots, to install this package:
+    install.packages("scatterplot3d",repos="http://R-Forge.R-project.org")
+
+## To draw a 3D scatter plot based on the "Expression", "Quality" and "Height" values:
+    library(scatterplot3d)
+    hi <- as.numeric(x[4,1:ncol(x)])
+    scatterplot3d(ex,qu,hi,pch=20,highlight.3d=T)
+
+## We can add more parameters like:
+    scatterplot3d(ex,qu,hi,pch=20,highlight.3d=T,type="h")

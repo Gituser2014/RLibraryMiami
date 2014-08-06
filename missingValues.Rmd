@@ -1,0 +1,62 @@
+---
+title: "Missing Values"
+author: "Juanjo Moreiras"
+date: "Tuesday, July 29, 2014"
+output: html_document
+---
+###____________MISSING VALUES__________________
+
+```{r}
+## A vector of all NAs
+x[is.na(x)]
+
+## A vector af all non-NA
+y <- x[!is.na(x)]
+
+## Values of x that are both non-missing AND > zero
+x[!is.na(x) & x > 0]
+```
+
+## Subsetting Missing Values is.na(x)
+## Common task is to remove missing values (NAS)
+
+```{r}
+x<- c(1,2,NA,4,NA,5)
+bad <- is.na(x) ## I want !NAs
+
+x[!bad]
+# [1] 1 2 4 5
+
+## Now I want to take a subset with no missing values
+x <- c(1,2,NA,4,NA,5)
+y <- c("a","b",NA,"d",NA,"f")
+good <- complete.cases(x,y)
+good
+# [1]  TRUE  TRUE FALSE  TRUE FALSE  TRUE
+x[good]
+# [1] 1 2 4 5
+y[good]
+# [1] "a" "b" "d" "f"
+
+## Now for example
+## create a vector with 1000 draws from a standard normal distribution
+x <- rnorm(1000)
+
+## create a vector with 1000 NAs
+z <- rep(NA,1000)
+
+## Now, take a sample of 100 elements at random from these 2000
+myData <- sample(c(x,z),100)
+
+## QUESTION: Where our NAs are located in our data?
+myNA <- is.na(myData); myNA  ## or with
+myData==NA  ## or with ; is.na(myData)
+## Counting NA
+sum(myNA) ##and finally ; (myData)
+
+## Now, removing NA values from data frames
+airquality[1:6,  ]
+good <- complete.cases(airquality)
+airquality[good, ][1:6, ]  ## with !NA
+```
+

@@ -1,0 +1,222 @@
+---
+title: "Subsetting_01"
+author: "Juanjo Moreiras"
+date: "Wednesday, July 23, 2014"
+output: html_document
+
+---
+
+Basics--Making a matrix
+> head(x)
+## select just column names
+> x[,c('juan','pedro','carlos')]
+  juan  pedro  carlos
+  -------------------
+1
+2
+3
+4
+.....
+## selecting row and column names
+> x[3:6, c('juan','pedro','carlos')]
+   juan  pedro  carlos
+   ------------------
+3
+4
+5
+6
+## selecting rows that meet certain criteria
+> x[x$c > 3.0, ]
+     juan  pedro  carlos
+     ------------------
+3.4
+3.8
+4.7
+.....
+
+```
+### Example_01
+## The annotation ia a genome sequences, but the techniques aren't particular to any type of data.
+
+```{r}
+
+head(df)
+#    sequence strand start   end common_name      value
+#1 chromosome      +  1450  2112        yvrO  0.9542516
+#2 chromosome      + 41063 41716       graD6  0.2374012
+#3 chromosome      + 62927 63640       graD3  1.0454790
+#4 chromosome      + 63881 64807         gmd  1.4383845
+#5 chromosome      + 71811 72701        moaE -1.8739953
+#6 chromosome      + 73639 74739        moaA  1.2711058
+
+```
+
+## Given this data.frame, how do we do some simple select operations?
+
+## Selecting columns by name is easy
+
+```
+
+```{r}
+
+df[,c('sequence','start','end')]
+#       sequence   start     end
+#1    chromosome    1450    2112
+#2    chromosome   41063   41716
+#3    chromosome   62927   63640
+#4    chromosome   63881   64807
+#5    chromosome   71811   72701
+...
+
+```
+
+## As is selecting row names, or both
+
+```{r}
+
+df[566:570,c('sequence','start','end')]
+#      sequence  start    end
+#566 chromosome 480999 479860
+#567 chromosome 481397 480999
+#568 chromosome 503053 501275
+#569 chromosome 506476 505712
+#570 chromosome 515461 514277
+
+```
+
+## Selecting rows that meet certain criteria
+
+```{r}
+
+df[df$value>3.0,]
+#      sequence strand   start     end common_name    #value
+#199 chromosome      +  907743  909506        hutU 3.158821
+#321 chromosome      + 1391811 1393337        nadB 3.092771
+#556 chromosome      -  431600  431037         apt 3.043373
+#572 chromosome      -  519043  518186        hbd1 3.077040
+
+```
+
+## For extra bonus points, let's find tRNAs.
+
+```{r}
+
+df[grep("trna", df$common_name, ignore.case=T),]
+      sequence strand   start     end common_name        value
+18  chromosome      +  115152  115224    Asn tRNA -0.461038128
+19  chromosome      +  115314  115422    Ile tRNA -0.925268307
+31  chromosome      +  167315  167388    Tyr tRNA  0.112527023
+32  chromosome      +  191112  191196    Ser tRNA  0.986357577
+...
+
+```
+
+### Example_02
+## Duplicate row names
+## Row names are not necessarily unique in R, which breaks the method shown above for selecting by row name. Take matrix
+
+```{r}
+
+a = matrix(1:18, nrow=6, ncol=3)
+rownames(a) <- c('a', 'a', 'a', 'b', 'b', 'b')
+colnames(a) <- c('foo', 'bar', 'bat')
+a
+#  foo bar bat
+#a   1   7  13
+#a   2   8  14
+#a   3   9  15
+#b   4  10  16
+#b   5  11  17
+#b   6  12  18
+
+```
+
+## Indexing by the row names just returns the first row of a given name
+
+```{r}
+
+a['a',]
+#foo bar bat 
+#  1   7  13
+
+a['b',]
+#foo bar bat 
+#  4  10  16 
+
+```
+
+## Also, this works
+
+```{r}
+
+a[rownames(a)=='a',]
+#  foo bar bat
+#a   1   7  13
+#a   2   8  14
+#a   3   9  15
+
+```
+
+## Missing Values
+ data objects with missing values is 'na.fail' which returns the value 'NA
+
+```{r}
+
+x <- 1:10; x <- x[1:12]; z <- data.frame(x,y=12:1) #creats data frame with NAs
+#i    x  y
+#1   1 12
+#2   2 11
+#3   3 10
+#4   4  9
+#5   5  8
+#6   6  7
+#7   7  6
+#8   8  5
+#9   9  4
+#10 10  3
+#11 NA  2
+#12 NA  1
+
+is.na(x)  ## finds which elements of x contain 'NA' fields
+# FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE
+
+na.omit(z) ## removes rows with 'NA' fields in numeric data objects
+#    x  y
+#1   1 12
+#2   2 11
+#3   3 10
+#4   4  9
+#5   5  8
+#6   6  7
+#7   7  6
+#8   8  5
+#9   9  4
+#10 10  3
+
+x <- letters[1:10];x
+ #"a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
+x <- x[1:12];x
+ #"a" "b" "c" "d" "e" "f" "g" "h" "i" "j" NA  NA 
+x[!is.na(x)]
+# "a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
+is.na(x)
+#FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE
+
+
+## Uses available values to perform calculation while ignoring the 'NA' values
+apply(z, 1, mean, na.rm=T)
+#6.5 6.5 6.5 6.5 6.5 6.5 6.5 6.5 6.5 6.5 2.0 1.0
+
+```
+
+## More Resources:
+
+.R programming for those coming from other languages
+.Extract or Replace Parts of a Data Frame
+.Subsetting Vectors, Matrices and Data Frames
+.R & BioConductor Manual
+.R Help search engine
+.Abandon hope all ye who enter The R Inferno
+.R Programming for Bioinformatics
+
+```
